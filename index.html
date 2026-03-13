@@ -1,0 +1,870 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>WageWise — Smart Payroll Platform</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --charcoal: #2c2e2a;
+      --beige-400: #f5f1e4;
+      --beige-500: #e0dbce;
+      --beige-600: #c2bcad;
+      --cyan: #00bdd4;
+      --cyan-light: #5dd4e0;
+      --yellow: #f5a623;
+      --red: #ff705d;
+      --blue: #2ba0ff;
+      --pink: #ebc1ff;
+      --white: #fff;
+      --black: #000;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; border: 0; }
+    html { font-family: 'Inter', sans-serif; font-weight: 500; -webkit-font-smoothing: antialiased; font-size: 16px; }
+    body { background: var(--white); color: var(--charcoal); overflow-x: hidden; }
+    ::selection { background: var(--cyan); color: var(--black); }
+
+    /* NAV */
+    nav {
+      background: rgba(36,38,34,0.97);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-bottom: 1px solid rgba(255,255,255,0.07);
+      box-shadow: 0 1px 0 rgba(0,0,0,0.3), 0 4px 24px rgba(0,0,0,0.18);
+      position: sticky; top: 0; z-index: 100;
+      height: 64px;
+      display: flex; align-items: center;
+      padding: 0 40px;
+      gap: 40px;
+    }
+    .nav-logo { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+    .nav-logo img { height: 32px; width: auto; }
+    .nav-logo-text {
+      color: var(--white);
+      font-size: 1.125rem;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+    }
+    .nav-links { display: flex; gap: 4px; margin-left: auto; }
+
+    /* Hover-gradient nav item */
+    .nav-item { position: relative; }
+    .nav-item-glow {
+      position: absolute;
+      inset: -8px;
+      border-radius: 14px;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.35s ease;
+    }
+    .nav-item:hover .nav-item-glow { opacity: 1; }
+    .nav-item-glow { background: radial-gradient(circle, rgba(0,189,212,0.22) 0%, rgba(0,189,212,0.07) 50%, rgba(0,189,212,0) 100%) !important; }
+    .nav-item-inner { position: relative; }
+    .nav-item-front {
+      display: flex;
+      align-items: center;
+      padding: 8px 14px;
+      border-radius: 10px;
+      font-size: 0.875rem;
+      font-weight: 500;
+      text-decoration: none;
+      color: rgba(224,219,206,0.6);
+      transition: transform 0.3s ease, color 0.3s ease;
+    }
+    .nav-item:hover .nav-item-front {
+      transform: translateY(-2px);
+      color: var(--white);
+    }
+    .nav-item-back { display: none; }
+
+    .nav-cta {
+      background: var(--cyan);
+      color: var(--white);
+      border-radius: 10px;
+      padding: 10px 20px;
+      font-size: 0.875rem;
+      font-weight: 600;
+      text-decoration: none;
+      cursor: pointer;
+      transition: transform 0.25s cubic-bezier(.34,1.56,.64,1), opacity 0.2s;
+    }
+    .nav-cta:hover { transform: translateY(-1px); opacity: 0.9; }
+
+    /* HERO */
+    .hero {
+      background: var(--charcoal);
+      min-height: calc(100vh - 64px);
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      padding: 80px 15vw 100px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .hero-title {
+      font-size: clamp(3rem, 9.7vw, 9.7vw);
+      font-weight: 500;
+      letter-spacing: -0.06em;
+      line-height: 0.95;
+      color: var(--white);
+      position: relative; z-index: 1;
+    }
+    .hero-title .accent { color: var(--cyan); }
+    .hero-subtitle {
+      margin-top: 32px;
+      color: var(--beige-500);
+      font-size: clamp(0.9rem, 1.2vw, 1.1rem);
+      line-height: 1.6;
+      max-width: 480px;
+      position: relative; z-index: 1;
+    }
+    .hero-btn {
+      margin-top: 40px;
+      background: var(--cyan);
+      color: var(--white);
+      border-radius: 50px;
+      padding: 16px 36px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      text-decoration: none;
+      display: inline-flex; align-items: center; gap: 8px;
+      transition: transform 0.25s cubic-bezier(.34,1.56,.64,1), opacity 0.2s;
+      position: relative; z-index: 1;
+    }
+    .hero-btn:hover { transform: translateY(-3px) scale(1.02); }
+    .hero-btn:active { transform: translateY(0) scale(0.98); }
+
+    /* Floating blobs */
+    .blob {
+      position: absolute;
+      border-radius: 50%;
+      pointer-events: none;
+    }
+    .blob-1 { width: 220px; height: 220px; background: var(--cyan); opacity: 0.7; top: 12%; left: 6%; border-radius: 50% 60% 70% 40%; }
+    .blob-2 { width: 80px; height: 80px; background: var(--yellow); top: 18%; right: 10%; border-radius: 50%; }
+    .blob-3 { width: 50px; height: 50px; background: var(--red); top: 55%; left: 5%; border-radius: 50%; }
+    .blob-4 { width: 60px; height: 60px; background: var(--blue); bottom: 20%; right: 6%; border-radius: 50%; }
+    .blob-5 { width: 40px; height: 40px; background: var(--pink); top: 35%; right: 20%; border-radius: 50%; }
+    .blob-6 { width: 30px; height: 30px; background: var(--lime); bottom: 28%; left: 20%; border-radius: 50%; }
+
+    /* ILLUSTRATION SECTION */
+    .section-illustration {
+      background: var(--beige-400);
+      padding: 100px 40px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 60px;
+      overflow: hidden;
+    }
+    .section-illustration .illus-left {
+      flex: 1;
+      max-width: 520px;
+    }
+    .section-illustration .illus-heading {
+      font-size: clamp(2.5rem, 5vw, 4.5rem);
+      font-weight: 500;
+      letter-spacing: -0.05em;
+      line-height: 0.95;
+      color: var(--charcoal);
+    }
+    .section-illustration .illus-heading .accent { color: var(--cyan); }
+    .section-illustration .illus-body {
+      margin-top: 24px;
+      font-size: 1rem;
+      line-height: 1.7;
+      color: var(--charcoal);
+      opacity: 0.7;
+      max-width: 380px;
+    }
+    .illus-right {
+      flex: 1;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      position: relative;
+      min-height: 340px;
+    }
+    /* App screenshot display */
+    .illus-screenshot {
+      width: 100%;
+      max-width: 560px;
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow:
+        0 4px 12px rgba(0,0,0,0.12),
+        0 20px 60px rgba(0,189,212,0.15),
+        0 40px 100px rgba(0,0,0,0.18);
+      border: 1px solid rgba(0,0,0,0.08);
+      position: relative;
+    }
+    .illus-screenshot img {
+      width: 100%;
+      height: auto;
+      display: block;
+    }
+
+    /* READY SECTION */
+    .section-ready {
+      background: var(--charcoal);
+      padding: 100px 40px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 60px;
+    }
+    .section-ready .ready-right {
+      flex: 1;
+      max-width: 520px;
+    }
+    .section-ready .ready-heading {
+      font-size: clamp(2.5rem, 5vw, 4.5rem);
+      font-weight: 500;
+      letter-spacing: -0.05em;
+      line-height: 0.95;
+      color: var(--white);
+    }
+    .section-ready .ready-heading .accent { color: var(--cyan); }
+    .section-ready .ready-body {
+      margin-top: 24px;
+      font-size: 1rem;
+      line-height: 1.7;
+      color: var(--beige-500);
+      max-width: 380px;
+    }
+    .ready-btn {
+      margin-top: 36px;
+      background: var(--white);
+      color: var(--charcoal);
+      border-radius: 50px;
+      padding: 14px 32px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      text-decoration: none;
+      display: inline-block;
+      transition: transform 0.25s cubic-bezier(.34,1.56,.64,1);
+    }
+    .ready-btn:hover { transform: translateY(-2px); }
+    .ready-left {
+      flex: 1;
+      display: flex;
+      justify-content: center;
+    }
+    .ready-screenshot {
+      width: 100%;
+      max-width: 500px;
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow:
+        0 4px 12px rgba(0,0,0,0.15),
+        0 20px 60px rgba(0,189,212,0.12),
+        0 40px 100px rgba(0,0,0,0.22);
+      border: 1px solid rgba(255,255,255,0.08);
+    }
+    .ready-screenshot img {
+      width: 100%;
+      height: auto;
+      display: block;
+    }
+
+    /* STATS SECTION */
+    .section-stats {
+      background: var(--beige-400);
+      padding: 80px 40px;
+    }
+    .stats-label {
+      font-size: 0.8rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--charcoal);
+      opacity: 0.5;
+      margin-bottom: 48px;
+      text-align: center;
+    }
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 2px;
+      background: var(--beige-600);
+      border-radius: 20px;
+      overflow: hidden;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    .stat-item {
+      background: var(--beige-400);
+      padding: 48px 40px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .stat-number {
+      font-size: clamp(2.5rem, 4.5vw, 4rem);
+      font-weight: 500;
+      letter-spacing: -0.04em;
+      line-height: 1;
+      color: var(--charcoal);
+    }
+    .stat-number .unit { color: var(--cyan); }
+    .stat-desc {
+      font-size: 0.875rem;
+      line-height: 1.5;
+      color: var(--charcoal);
+      opacity: 0.6;
+      max-width: 200px;
+    }
+
+    /* CARDS SECTION */
+    .section-cards {
+      background: var(--beige-500);
+      padding: 80px 40px;
+    }
+    .cards-header {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      margin-bottom: 40px;
+      gap: 20px;
+    }
+    .cards-heading {
+      font-size: clamp(1.8rem, 3vw, 2.8rem);
+      font-weight: 500;
+      letter-spacing: -0.04em;
+      line-height: 1;
+      color: var(--charcoal);
+    }
+    .cards-link {
+      color: var(--charcoal);
+      font-size: 0.875rem;
+      font-weight: 600;
+      text-decoration: none;
+      opacity: 0.5;
+      white-space: nowrap;
+      transition: opacity 0.2s;
+    }
+    .cards-link:hover { opacity: 1; }
+    .cards-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+    }
+    .card {
+      border-radius: 20px;
+      overflow: hidden;
+      background: var(--charcoal);
+      position: relative;
+      aspect-ratio: 3/4;
+      cursor: pointer;
+      transition: transform 0.3s cubic-bezier(.34,1.56,.64,1);
+    }
+    .card:hover { transform: translateY(-6px) scale(1.01); }
+    .card-bg {
+      position: absolute; inset: 0;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .card-bg-1 { background: linear-gradient(135deg, #00bdd4 0%, #0077a8 100%); }
+    .card-bg-2 { background: linear-gradient(135deg, #00a896 0%, #00bdd4 100%); }
+    .card-bg-3 { background: linear-gradient(135deg, var(--yellow) 0%, #e07b00 100%); }
+    .card-overlay {
+      position: absolute; inset: 0;
+      background: linear-gradient(to top, rgba(0,0,0,0.7) 0%, transparent 50%);
+    }
+    .card-content {
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      padding: 24px;
+    }
+    .card-tag {
+      display: inline-block;
+      background: rgba(255,255,255,0.15);
+      color: var(--white);
+      border-radius: 50px;
+      padding: 4px 12px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      margin-bottom: 10px;
+      backdrop-filter: blur(4px);
+    }
+    .card-title {
+      color: var(--white);
+      font-size: 1.1rem;
+      font-weight: 500;
+      letter-spacing: -0.02em;
+      line-height: 1.3;
+    }
+    .card-icon {
+      font-size: 64px;
+      opacity: 0.4;
+    }
+
+    /* BRANDS SECTION */
+    .section-brands {
+      background: var(--beige-400);
+      padding: 60px 40px;
+      overflow: hidden;
+    }
+    .brands-label {
+      font-size: 0.8rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--charcoal);
+      opacity: 0.4;
+      text-align: center;
+      margin-bottom: 36px;
+    }
+    .brands-track-wrap { overflow: hidden; }
+    .brands-track {
+      display: flex;
+      gap: 64px;
+      align-items: center;
+      animation: marquee 20s linear infinite;
+      width: max-content;
+    }
+    @keyframes marquee {
+      from { transform: translateX(0); }
+      to { transform: translateX(-50%); }
+    }
+    .brand-item {
+      font-size: 1.1rem;
+      font-weight: 600;
+      letter-spacing: -0.03em;
+      color: var(--charcoal);
+      opacity: 0.35;
+      white-space: nowrap;
+      transition: opacity 0.2s;
+    }
+    .brand-item:hover { opacity: 0.8; }
+
+    /* CONNECT SECTION */
+    .section-connect {
+      background: var(--charcoal);
+      padding: 120px 40px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .connect-label {
+      font-size: 0.8rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--cyan);
+      margin-bottom: 24px;
+    }
+    .connect-heading {
+      font-size: clamp(3rem, 7vw, 6rem);
+      font-weight: 500;
+      letter-spacing: -0.06em;
+      line-height: 0.95;
+      color: var(--white);
+      max-width: 700px;
+    }
+    .connect-heading .accent { color: var(--cyan); }
+    .connect-body {
+      margin-top: 24px;
+      font-size: 1rem;
+      line-height: 1.7;
+      color: var(--beige-500);
+      max-width: 440px;
+    }
+    .connect-actions {
+      margin-top: 48px;
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .connect-btn-primary {
+      background: var(--cyan);
+      color: var(--white);
+      border-radius: 50px;
+      padding: 16px 36px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      text-decoration: none;
+      transition: transform 0.25s cubic-bezier(.34,1.56,.64,1);
+    }
+    .connect-btn-primary:hover { transform: translateY(-3px); }
+    .connect-btn-secondary {
+      background: transparent;
+      color: var(--beige-400);
+      border-radius: 50px;
+      padding: 16px 36px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      text-decoration: none;
+      border: 1.5px solid rgba(255,255,255,0.2);
+      transition: transform 0.25s cubic-bezier(.34,1.56,.64,1), border-color 0.2s;
+    }
+    .connect-btn-secondary:hover { transform: translateY(-3px); border-color: rgba(255,255,255,0.5); }
+    .connect-blob-1 { position: absolute; width: 300px; height: 300px; border-radius: 50%; background: var(--cyan); opacity: 0.07; top: -80px; right: -60px; pointer-events: none; }
+    .connect-blob-2 { position: absolute; width: 200px; height: 200px; border-radius: 50%; background: var(--cyan-light); opacity: 0.07; bottom: -40px; left: -40px; pointer-events: none; }
+
+    /* FOOTER */
+    footer {
+      background: var(--charcoal);
+      border-top: 1px solid rgba(255,255,255,0.07);
+      padding: 48px 40px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 24px;
+    }
+    .footer-logo { display: flex; align-items: center; gap: 10px; }
+    .footer-logo img { height: 28px; width: auto; opacity: 0.9; }
+    .footer-logo-text { color: var(--beige-500); font-weight: 600; font-size: 1rem; letter-spacing: -0.02em; }
+    .footer-links { display: flex; gap: 28px; }
+    .footer-links a { color: var(--beige-600); text-decoration: none; font-size: 0.85rem; transition: color 0.2s; }
+    .footer-links a:hover { color: var(--beige-400); }
+    .footer-copy { color: var(--beige-600); font-size: 0.8rem; opacity: 0.6; }
+
+    /* Grain overlay */
+    .grain-overlay {
+      position: fixed; inset: 0; pointer-events: none; z-index: 9999; opacity: 0.025;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
+    }
+
+    @media (max-width: 900px) {
+      .section-illustration, .section-ready { flex-direction: column; padding: 60px 24px; }
+      .cards-grid { grid-template-columns: 1fr 1fr; }
+      .stats-grid { grid-template-columns: 1fr; }
+      nav { padding: 0 20px; }
+      .nav-links { display: none; }
+      footer { flex-direction: column; align-items: flex-start; padding: 40px 24px; }
+    }
+    @media (max-width: 600px) {
+      .cards-grid { grid-template-columns: 1fr; }
+      .hero { padding: 60px 8vw 80px; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="grain-overlay"></div>
+
+<!-- NAV -->
+<nav>
+  <a href="#" class="nav-logo">
+    <img src="wagewise_assets/Wagewise_logo.png" alt="WageWise logo" />
+    <span class="nav-logo-text">WageWise</span>
+  </a>
+  <div class="nav-links">
+    <div class="nav-item">
+      <div class="nav-item-glow" style="background:radial-gradient(circle, rgba(0,189,212,0.18) 0%, rgba(0,189,212,0.06) 50%, rgba(0,189,212,0) 100%);"></div>
+      <div class="nav-item-inner">
+        <a href="#" class="nav-item-front">Product</a>
+        <a href="#" class="nav-item-back">Product</a>
+      </div>
+    </div>
+    <div class="nav-item">
+      <div class="nav-item-glow" style="background:radial-gradient(circle, rgba(93,212,224,0.18) 0%, rgba(93,212,224,0.06) 50%, rgba(93,212,224,0) 100%);"></div>
+      <div class="nav-item-inner">
+        <a href="#" class="nav-item-front">Features</a>
+        <a href="#" class="nav-item-back">Features</a>
+      </div>
+    </div>
+    <div class="nav-item">
+      <div class="nav-item-glow" style="background:radial-gradient(circle, rgba(245,166,35,0.18) 0%, rgba(245,166,35,0.06) 50%, rgba(245,166,35,0) 100%);"></div>
+      <div class="nav-item-inner">
+        <a href="#" class="nav-item-front">Pricing</a>
+        <a href="#" class="nav-item-back">Pricing</a>
+      </div>
+    </div>
+    <div class="nav-item">
+      <div class="nav-item-glow" style="background:radial-gradient(circle, rgba(235,193,255,0.18) 0%, rgba(235,193,255,0.06) 50%, rgba(235,193,255,0) 100%);"></div>
+      <div class="nav-item-inner">
+        <a href="#" class="nav-item-front">About</a>
+        <a href="#" class="nav-item-back">About</a>
+      </div>
+    </div>
+  </div>
+  <a href="#" class="nav-cta" style="margin-left:auto;">Get started</a>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <!-- Animated grid pattern -->
+  <svg id="hero-grid" aria-hidden="true" style="
+    pointer-events:none;
+    position:absolute;
+    inset:0;
+    width:100%;
+    height:200%;
+    top:-30%;
+    transform:skewY(12deg);
+    transform-origin:center;
+    -webkit-mask-image:radial-gradient(ellipse 70% 60% at 50% 40%,white 0%,transparent 100%);
+    mask-image:radial-gradient(ellipse 70% 60% at 50% 40%,white 0%,transparent 100%);
+    fill:rgba(0,189,212,0.25);
+    stroke:rgba(0,189,212,0.15);
+    overflow:visible;
+  ">
+    <defs>
+      <pattern id="hero-grid-pat" width="40" height="40" patternUnits="userSpaceOnUse" x="-1" y="-1">
+        <path d="M.5 40V.5H40" fill="none" />
+      </pattern>
+    </defs>
+    <rect width="100%" height="100%" fill="url(#hero-grid-pat)" />
+    <g id="hero-grid-squares"></g>
+  </svg>
+
+  <div class="blob blob-1"></div>
+  <div class="blob blob-2"></div>
+  <div class="blob blob-3"></div>
+  <div class="blob blob-4"></div>
+  <div class="blob blob-5"></div>
+  <div class="blob blob-6"></div>
+
+  <h1 class="hero-title">
+    Real wage<br/><span class="accent">insights</span>
+  </h1>
+  <p class="hero-subtitle">
+    WageWise gives your HR team the tools to manage payroll with clarity, speed, and zero guesswork — every pay cycle.
+  </p>
+  <a href="#" class="hero-btn">
+    Start for free
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  </a>
+</section>
+
+<!-- ILLUSTRATION SECTION -->
+<section class="section-illustration">
+  <div class="illus-left">
+    <h2 class="illus-heading">Manage<br/><span class="accent">your team</span><br/>with ease</h2>
+    <p class="illus-body">
+      Centralize your employee records, track attendance, and manage roles — all in one clean dashboard built for Philippine businesses.
+    </p>
+  </div>
+  <div class="illus-right">
+    <div class="illus-screenshot">
+      <img src="wagewise_assets/Wagewise_adminemployeepage.png" alt="WageWise Employee Management" />
+    </div>
+  </div>
+</section>
+
+<!-- READY SECTION -->
+<section class="section-ready">
+  <div class="ready-left">
+    <div class="ready-screenshot">
+      <img src="wagewise_assets/Wagewise_adminpayrollpage.png" alt="WageWise Payroll Processing" />
+    </div>
+  </div>
+  <div class="ready-right">
+    <h2 class="ready-heading">Payroll<br/>in<br/><span class="accent">minutes</span></h2>
+    <p class="ready-body">
+      Bulk-generate payslips for all employees in one click. Automatic deductions for SSS, PhilHealth, Pag-IBIG, and tax — always compliant.
+    </p>
+    <a href="#" class="ready-btn">Explore the platform</a>
+  </div>
+</section>
+
+<!-- STATS SECTION -->
+<section class="section-stats">
+  <p class="stats-label">A few numbers behind the insights we deliver</p>
+  <div class="stats-grid">
+    <div class="stat-item">
+      <div class="stat-number">55<span class="unit">+</span></div>
+      <div class="stat-desc">Industries using WageWise to manage their workforce payroll</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-number">350<span class="unit">+</span></div>
+      <div class="stat-desc">Companies processing payroll every month on our platform</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-number">40<span class="unit">k</span></div>
+      <div class="stat-desc">Employees paid accurately and on time using WageWise</div>
+    </div>
+  </div>
+</section>
+
+<!-- CARDS SECTION -->
+<section class="section-cards">
+  <div class="cards-header">
+    <h2 class="cards-heading">What we offer</h2>
+    <a href="#" class="cards-link">View all features →</a>
+  </div>
+  <div class="cards-grid">
+    <div class="card">
+      <div class="card-bg card-bg-1">
+        <span class="card-icon">👥</span>
+      </div>
+      <div class="card-overlay"></div>
+      <div class="card-content">
+        <span class="card-tag">Employees</span>
+        <div class="card-title">Manage records, roles, and attendance in one place</div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-bg card-bg-2">
+        <span class="card-icon">💳</span>
+      </div>
+      <div class="card-overlay"></div>
+      <div class="card-content">
+        <span class="card-tag">Payroll</span>
+        <div class="card-title">Bulk payslip generation with automatic deductions</div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-bg card-bg-3">
+        <span class="card-icon">🏛️</span>
+      </div>
+      <div class="card-overlay"></div>
+      <div class="card-content">
+        <span class="card-tag">Compliance</span>
+        <div class="card-title">SSS, PhilHealth, Pag-IBIG & BIR — always up to date</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- BRANDS SECTION -->
+<section class="section-brands">
+  <p class="brands-label">Companies that trust WageWise</p>
+  <div class="brands-track-wrap">
+    <div class="brands-track">
+      <span class="brand-item">Accenture</span>
+      <span class="brand-item">Globe Telecom</span>
+      <span class="brand-item">SM Investments</span>
+      <span class="brand-item">Jollibee Group</span>
+      <span class="brand-item">Ayala Corporation</span>
+      <span class="brand-item">BDO Unibank</span>
+      <span class="brand-item">PLDT</span>
+      <span class="brand-item">Metrobank</span>
+      <!-- duplicate for seamless loop -->
+      <span class="brand-item">Accenture</span>
+      <span class="brand-item">Globe Telecom</span>
+      <span class="brand-item">SM Investments</span>
+      <span class="brand-item">Jollibee Group</span>
+      <span class="brand-item">Ayala Corporation</span>
+      <span class="brand-item">BDO Unibank</span>
+      <span class="brand-item">PLDT</span>
+      <span class="brand-item">Metrobank</span>
+    </div>
+  </div>
+</section>
+
+<!-- LET'S CONNECT -->
+<section class="section-connect">
+  <div class="connect-blob-1"></div>
+  <div class="connect-blob-2"></div>
+  <p class="connect-label">Get in touch</p>
+  <h2 class="connect-heading">Let's<br/><span class="accent">Connect</span></h2>
+  <p class="connect-body">
+    Talk to our team and see how WageWise can transform the way your company handles payroll.
+  </p>
+  <div class="connect-actions">
+    <a href="#" class="connect-btn-primary">Book a demo</a>
+    <a href="#" class="connect-btn-secondary">Contact us</a>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-logo">
+    <img src="wagewise_assets/Wagewise_logo.png" alt="WageWise" />
+    <span class="footer-logo-text">WageWise</span>
+  </div>
+  <div class="footer-links">
+    <a href="#">Privacy</a>
+    <a href="#">Terms</a>
+    <a href="#">Support</a>
+    <a href="#">Blog</a>
+  </div>
+  <span class="footer-copy">© 2025 WageWise. All rights reserved.</span>
+</footer>
+
+<script>
+(function() {
+  var CELL = 40;
+  var NUM_SQUARES = 30;
+  var MAX_OPACITY = 0.1;
+  var DURATION = 3000;   // ms
+  var REPEAT_DELAY = 1000; // ms
+
+  var svg = document.getElementById('hero-grid');
+  var group = document.getElementById('hero-grid-squares');
+  var NS = 'http://www.w3.org/2000/svg';
+
+  function cols() { return Math.ceil(svg.clientWidth / CELL) + 2; }
+  function rows() { return Math.ceil(svg.clientHeight / CELL) + 2; }
+
+  function randomPos() {
+    return [
+      Math.floor(Math.random() * cols()),
+      Math.floor(Math.random() * rows())
+    ];
+  }
+
+  function animateSquare(rect) {
+    var start = null;
+    var phase = 'in'; // 'in' | 'wait' | 'out' | 'pause'
+    var phaseStart = null;
+
+    function tick(ts) {
+      if (!start) start = ts;
+      if (!phaseStart) phaseStart = ts;
+      var elapsed = ts - phaseStart;
+
+      if (phase === 'in') {
+        var t = Math.min(elapsed / DURATION, 1);
+        rect.style.opacity = t * MAX_OPACITY;
+        if (t >= 1) { phase = 'out'; phaseStart = ts; }
+      } else if (phase === 'out') {
+        var t = Math.min(elapsed / DURATION, 1);
+        rect.style.opacity = (1 - t) * MAX_OPACITY;
+        if (t >= 1) { phase = 'pause'; phaseStart = ts; }
+      } else if (phase === 'pause') {
+        rect.style.opacity = 0;
+        if (elapsed >= REPEAT_DELAY) {
+          // reposition
+          var pos = randomPos();
+          rect.setAttribute('x', pos[0] * CELL + 1);
+          rect.setAttribute('y', pos[1] * CELL + 1);
+          phase = 'in';
+          phaseStart = ts;
+        }
+      }
+
+      requestAnimationFrame(tick);
+    }
+
+    requestAnimationFrame(tick);
+  }
+
+  function init() {
+    group.innerHTML = '';
+    for (var i = 0; i < NUM_SQUARES; i++) {
+      var pos = randomPos();
+      var rect = document.createElementNS(NS, 'rect');
+      rect.setAttribute('width', CELL - 1);
+      rect.setAttribute('height', CELL - 1);
+      rect.setAttribute('x', pos[0] * CELL + 1);
+      rect.setAttribute('y', pos[1] * CELL + 1);
+      rect.setAttribute('fill', 'currentColor');
+      rect.setAttribute('stroke-width', '0');
+      rect.style.opacity = 0;
+      group.appendChild(rect);
+
+      // stagger start
+      (function(r, delay) {
+        setTimeout(function() { animateSquare(r); }, delay);
+      })(rect, i * 100);
+    }
+  }
+
+  if (svg.clientWidth > 0) {
+    init();
+  } else {
+    window.addEventListener('load', init);
+  }
+})();
+</script>
+</body>
+</html>
