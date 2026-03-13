@@ -1,0 +1,987 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>WageWise — My Dashboard</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --cyan: #00bdd4; --cyan-dark: #009ab0; --cyan-light: rgba(0,189,212,0.1);
+      --charcoal: #2c2e2a;
+      --bg: #f0f2f5; --white: #fff; --border: #e2e8f0;
+      --text: #1a202c; --muted: #718096;
+      --success: #38a169; --success-bg: #f0fff4; --success-border: #c6f6d5;
+      --shadow-sm: 0 1px 3px rgba(0,0,0,0.07), 0 1px 2px rgba(0,0,0,0.04);
+      --shadow-md: 0 4px 12px rgba(0,0,0,0.07), 0 2px 4px rgba(0,0,0,0.04);
+      --radius: 12px;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); -webkit-font-smoothing: antialiased; }
+
+    /* ── SIDEBAR NAV ── */
+    .sidebar {
+      position: fixed; left: 0; top: 0; bottom: 0; width: 224px;
+      background: var(--white); border-right: 1px solid var(--border);
+      box-shadow: var(--shadow-sm); z-index: 50;
+      display: flex; flex-direction: column;
+    }
+    .sidebar-brand {
+      display: flex; align-items: center; gap: 10px;
+      padding: 18px 16px;
+      text-decoration: none; flex-shrink: 0;
+      background: var(--cyan);
+    }
+    .sidebar-brand img { height: 28px; width: auto; filter: brightness(0) invert(1); }
+    .sidebar-brand-text { font-size: 0.9rem; font-weight: 700; color: white; letter-spacing: -0.01em; }
+    .sidebar-section-label {
+      padding: 16px 16px 4px;
+      font-size: 0.68rem; font-weight: 700; color: var(--muted);
+      text-transform: uppercase; letter-spacing: 0.08em;
+    }
+    .sidebar-nav {
+      flex: 1; padding: 6px 8px;
+      display: flex; flex-direction: column; gap: 2px; overflow-y: auto;
+    }
+    .sidebar-link {
+      position: relative;
+      display: flex; align-items: center; gap: 10px;
+      padding: 9px 12px; border-radius: 8px;
+      font-size: 0.875rem; font-weight: 500; color: var(--muted);
+      text-decoration: none; cursor: pointer;
+      border: none; background: none; font-family: inherit;
+      width: 100%; text-align: left;
+    }
+    .sidebar-link:hover { color: var(--text); background: var(--bg); }
+    .sidebar-link.active { color: var(--cyan); background: var(--cyan-light); }
+    .sidebar-link svg { flex-shrink: 0; }
+    .sidebar-link-inner { flex: 1; }
+    .sidebar-link-back { display: none; }
+    .sidebar-footer { padding: 8px; border-top: 1px solid var(--border); flex-shrink: 0; }
+    .sidebar-user-row {
+      display: flex; align-items: center; gap: 10px;
+      padding: 8px 10px; margin-bottom: 4px;
+    }
+    .sidebar-user-info { display: flex; flex-direction: column; flex: 1; min-width: 0; }
+    .sidebar-user-name {
+      font-size: 0.8rem; font-weight: 600; color: var(--text);
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .sidebar-user-role { font-size: 0.72rem; color: var(--muted); }
+    .nav-avatar {
+      width: 34px; height: 34px; border-radius: 50%;
+      background: var(--cyan); color: white;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.8rem; font-weight: 700; cursor: pointer;
+      flex-shrink: 0; position: relative;
+    }
+    .avatar-menu {
+      position: absolute; bottom: calc(100% + 8px); left: 0;
+      background: var(--white); border: 1px solid var(--border);
+      border-radius: 10px; box-shadow: var(--shadow-md);
+      min-width: 180px; overflow: hidden;
+      display: none; z-index: 100;
+    }
+    .avatar-menu.open { display: block; }
+    .avatar-menu-item { display: block; padding: 10px 16px; font-size: 0.85rem; color: var(--text); cursor: pointer; border: none; background: none; width: 100%; text-align: left; font-family: inherit; }
+    .avatar-menu-item:hover { background: var(--bg); }
+    .avatar-menu-item.danger { color: #e53e3e; }
+    /* ── PAGE WRAPPER ── */
+    .page-wrapper { margin-left: 224px; }
+
+    /* ── LAYOUT ── */
+    main { padding: 32px; max-width: 960px; margin: 0 auto; display: flex; flex-direction: column; gap: 20px; }
+
+    /* ── WELCOME BANNER ── */
+    .welcome-banner {
+      background: linear-gradient(135deg, var(--charcoal) 0%, #3a3d38 100%);
+      border-radius: var(--radius);
+      padding: 28px 32px;
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 20px;
+      box-shadow: 0 4px 20px rgba(44,46,42,0.25);
+    }
+    .welcome-text h1 { font-size: 1.4rem; font-weight: 700; color: white; letter-spacing: -0.02em; }
+    .welcome-text p { font-size: 0.875rem; color: rgba(255,255,255,0.55); margin-top: 4px; }
+    .welcome-badge {
+      background: rgba(0,189,212,0.15); border: 1px solid rgba(0,189,212,0.35);
+      color: var(--cyan); border-radius: 8px; padding: 8px 16px;
+      font-size: 0.8rem; font-weight: 600;
+    }
+
+    /* ── BENTO INFO CARDS ── */
+    .info-row { display: grid; grid-template-columns: repeat(3,1fr); gap: 16px; }
+    .info-card {
+      background: var(--white); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 22px 24px;
+      box-shadow: var(--shadow-sm); position: relative; overflow: hidden;
+      transition: transform 0.2s, box-shadow 0.2s;
+      display: flex; flex-direction: column;
+    }
+    .info-card:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(0,0,0,0.09); }
+    .info-card::after {
+      content: ''; position: absolute; top: -24px; right: -24px;
+      width: 96px; height: 96px; border-radius: 50%; opacity: 0.07;
+    }
+    .info-card:nth-child(1) { border-top: 3px solid var(--cyan); }
+    .info-card:nth-child(1)::after { background: var(--cyan); }
+    .info-card:nth-child(2) { border-top: 3px solid #805ad5; }
+    .info-card:nth-child(2)::after { background: #805ad5; }
+    .info-card:nth-child(3) { border-top: 3px solid #38a169; }
+    .info-card:nth-child(3)::after { background: #38a169; }
+    /* Quick action strip */
+    .quick-actions { display: flex; gap: 12px; margin-top: 0; }
+    .quick-action-card {
+      flex: 1; background: var(--white); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 16px 20px;
+      display: flex; align-items: center; justify-content: space-between;
+      box-shadow: var(--shadow-sm); cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+      text-decoration: none;
+    }
+    .quick-action-card:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(0,0,0,0.09); }
+    .quick-action-left { display: flex; align-items: center; gap: 12px; }
+    .quick-action-icon { width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; }
+    .qai-cyan { background: rgba(0,189,212,0.1); color: var(--cyan); }
+    .qai-purple { background: rgba(128,90,213,0.1); color: #805ad5; }
+    .quick-action-label { font-size: 0.875rem; font-weight: 600; color: var(--text); }
+    .quick-action-sub { font-size: 0.775rem; color: var(--muted); margin-top: 1px; }
+    .quick-action-arrow { color: var(--muted); }
+    .info-card-icon {
+      width: 34px; height: 34px; border-radius: 9px;
+      display: flex; align-items: center; justify-content: center;
+      margin-bottom: 12px;
+    }
+    .info-card:nth-child(1) .info-card-icon { background: rgba(0,189,212,0.1); color: var(--cyan); }
+    .info-card:nth-child(2) .info-card-icon { background: rgba(128,90,213,0.1); color: #805ad5; }
+    .info-card:nth-child(3) .info-card-icon { background: rgba(56,161,105,0.1); color: #38a169; }
+    .info-label { font-size: 0.775rem; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px; }
+    .info-value { font-size: 1.2rem; font-weight: 700; color: var(--text); letter-spacing: -0.02em; }
+    .info-sub { font-size: 0.78rem; color: var(--muted); margin-top: 3px; }
+
+    /* ── PANEL ── */
+    .panel { background: var(--white); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow-sm); }
+    .panel-header { display: flex; align-items: center; justify-content: space-between; padding: 20px 24px; border-bottom: 1px solid var(--border); }
+    .panel-title { font-size: 1rem; font-weight: 600; }
+    .panel-body { padding: 24px; }
+
+    /* Payslip list */
+    .payslip-list { display: flex; flex-direction: column; }
+    .payslip-item { display: flex; align-items: center; justify-content: space-between; padding: 24px 0; border-bottom: 1px solid var(--border); gap: 12px; }
+    .payslip-item:last-child { border-bottom: none; }
+    .ps-period { font-size: 0.9rem; font-weight: 600; }
+    .ps-meta { font-size: 0.78rem; color: var(--muted); margin-top: 5px; }
+    .ps-amount { font-size: 0.95rem; font-weight: 700; margin-right: 12px; }
+
+    .badge { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 0.72rem; font-weight: 600; }
+    .badge-pending { background: #fffbeb; color: #92400e; border: 1px solid #fde68a; }
+    .badge-approved { background: var(--success-bg); color: var(--success); border: 1px solid var(--success-border); }
+
+    .btn { display: inline-flex; align-items: center; gap: 6px; padding: 9px 16px; border-radius: 8px; font-family: inherit; font-size: 0.85rem; font-weight: 600; cursor: pointer; border: none; transition: transform 0.2s, opacity 0.2s; text-decoration: none; }
+    .btn:hover { transform: translateY(-1px); opacity: 0.92; }
+    .btn-outline { background: none; border: 1px solid var(--border); color: var(--text); }
+    .btn-sm { padding: 6px 12px; font-size: 0.8rem; }
+    /* Panel header color accent */
+    .panel-header { display: flex; align-items: center; justify-content: space-between; padding: 20px 24px; border-bottom: 1px solid var(--border); background: linear-gradient(135deg, rgba(0,189,212,0.03) 0%, rgba(255,255,255,0) 60%); }
+    .panel-title { font-size: 1rem; font-weight: 700; color: var(--text); }
+
+    .empty-state { padding: 40px 0; text-align: center; color: var(--muted); font-size: 0.875rem; }
+
+    /* ── ACCOUNT SETTINGS MODAL ── */
+    .settings-modal { background: var(--white); border-radius: 16px; width: 100%; max-width: 480px; box-shadow: 0 24px 60px rgba(0,0,0,0.2); overflow: hidden; animation: settingsIn 0.2s ease; }
+    @keyframes settingsIn { from { transform: translateY(12px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+    .settings-header { background: linear-gradient(135deg, #00bdd4, #83d43c); padding: 20px 24px; display: flex; align-items: center; justify-content: space-between; }
+    .settings-header img { height: 26px; filter: brightness(0) invert(1); }
+    .settings-close { background: rgba(255,255,255,0.25); border: none; cursor: pointer; width: 28px; height: 28px; border-radius: 50%; color: white; font-size: 1rem; display: flex; align-items: center; justify-content: center; }
+    .settings-avatar-section { display: flex; flex-direction: column; align-items: center; padding: 24px 24px 16px; border-bottom: 1px solid var(--border); }
+    .settings-avatar-circle { width: 72px; height: 72px; border-radius: 50%; background: var(--cyan); color: white; font-size: 1.5rem; font-weight: 700; display: flex; align-items: center; justify-content: center; margin-bottom: 12px; border: 3px solid rgba(0,189,212,0.3); }
+    .settings-user-email { font-size: 0.8rem; color: var(--muted); margin-top: 2px; }
+    .settings-body { padding: 20px 24px; display: flex; flex-direction: column; gap: 16px; }
+    .settings-field label { display: block; font-size: 0.775rem; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px; }
+    .settings-field input { width: 100%; padding: 10px 14px; border: 1px solid var(--border); border-radius: 8px; font-family: inherit; font-size: 0.9rem; color: var(--text); background: var(--white); outline: none; transition: border-color 0.2s, box-shadow 0.2s; }
+    .settings-field input:focus { border-color: var(--cyan); box-shadow: 0 0 0 3px rgba(0,189,212,0.12); }
+    .settings-field input[readonly] { background: var(--bg); color: var(--muted); cursor: not-allowed; }
+    .settings-divider { border: none; border-top: 1px solid var(--border); margin: 4px 0; }
+    .settings-section-title { font-size: 0.8rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; }
+    .settings-alert { padding: 10px 14px; border-radius: 8px; font-size: 0.85rem; font-weight: 500; display: none; }
+    .settings-alert.error   { background: #fff5f5; border: 1px solid #fed7d7; color: #e53e3e; display: block; }
+    .settings-alert.success { background: #f0fff4; border: 1px solid #c6f6d5; color: #276749; display: block; }
+    .settings-footer { display: flex; justify-content: flex-end; gap: 10px; padding: 16px 24px; border-top: 1px solid var(--border); }
+    .btn-settings-save { background: var(--cyan); color: white; border: none; border-radius: 8px; padding: 9px 20px; font-family: inherit; font-size: 0.875rem; font-weight: 600; cursor: pointer; transition: transform 0.2s, background 0.2s; }
+    .btn-settings-save:hover { background: var(--cyan-dark); transform: translateY(-1px); }
+    .btn-settings-save:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+    .btn-settings-secondary { background: none; border: 1px solid var(--border); color: var(--text); border-radius: 8px; padding: 9px 20px; font-family: inherit; font-size: 0.875rem; font-weight: 600; cursor: pointer; transition: background 0.2s; }
+    .btn-settings-secondary:hover { background: var(--bg); }
+    .btn-settings-secondary:disabled { opacity: 0.6; cursor: not-allowed; }
+
+    /* Profile tab */
+    .profile-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    .profile-field {
+      background: var(--bg); border-radius: 10px; padding: 18px 20px;
+      border-left: 3px solid var(--cyan);
+    }
+    .profile-label { font-size: 0.72rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 8px; }
+    .profile-value { font-size: 0.95rem; font-weight: 600; color: var(--text); }
+
+    /* ── PAYSLIP VIEW MODAL ── */
+    .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.4); backdrop-filter: blur(4px); z-index: 200; align-items: center; justify-content: center; padding: 20px; }
+    .modal-overlay.open { display: flex; }
+    .payslip-modal { background: var(--white); border-radius: 16px; width: 100%; max-width: 520px; box-shadow: 0 24px 60px rgba(0,0,0,0.2); overflow: hidden; animation: modalIn 0.2s ease; }
+    @keyframes modalIn { from { transform: translateY(12px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+    .modal-header-gradient { background: linear-gradient(135deg, #00bdd4, #83d43c); padding: 20px 24px; display: flex; align-items: center; justify-content: space-between; }
+    .modal-header-gradient img { height: 28px; filter: brightness(0) invert(1); }
+    .close-btn { background: rgba(255,255,255,0.25); border: none; cursor: pointer; width: 28px; height: 28px; border-radius: 50%; color: white; font-size: 1rem; display: flex; align-items: center; justify-content: center; }
+    .payslip-name-row { display: flex; align-items: center; justify-content: space-between; padding: 16px 24px; border-bottom: 1px solid var(--border); }
+    .payslip-emp-name { font-size: 1.1rem; font-weight: 700; }
+    .payslip-date { font-size: 0.875rem; color: var(--muted); }
+    .section-label { font-size: 0.85rem; font-weight: 700; padding: 18px 24px 8px; }
+    .slip-table { width: 100%; border-collapse: collapse; }
+    .slip-table td { padding: 13px 24px; font-size: 0.875rem; }
+    .slip-table td:last-child { text-align: right; font-weight: 600; }
+    .slip-table.earnings tr { background: rgba(0,189,212,0.06); }
+    .slip-table.earnings tr:last-child { background: rgba(0,189,212,0.14); font-weight: 700; border-top: 1px solid rgba(0,189,212,0.3); }
+    .slip-table.deductions tr { background: #f8f9fa; }
+    .slip-table.deductions tr:last-child { background: #f0f2f5; font-weight: 700; border-top: 1px solid var(--border); }
+    .net-pay-footer { background: linear-gradient(135deg, #00bdd4, #83d43c); padding: 18px 24px; display: flex; justify-content: space-between; align-items: center; }
+    .net-pay-footer span { font-weight: 700; font-size: 1rem; color: white; }
+    .net-pay-footer .amount { font-size: 1.5rem; }
+    .payslip-actions { display: flex; justify-content: flex-end; gap: 10px; padding: 16px 24px; border-top: 1px solid var(--border); }
+
+    /* Invite modal */
+    .invite-modal-body { padding: 24px; }
+    .invite-role-row { display: flex; align-items: center; justify-content: space-between; padding: 16px 24px; border-bottom: 1px solid var(--border); }
+    .invite-role-name { font-size: 1.1rem; font-weight: 700; }
+    .invite-role-sub  { font-size: 0.875rem; color: var(--muted); }
+    .invite-detail-table { width: 100%; border-collapse: collapse; }
+    .invite-detail-table tr { background: rgba(0,189,212,0.06); }
+    .invite-detail-table tr:last-child { background: rgba(0,189,212,0.14); border-top: 1px solid rgba(0,189,212,0.3); }
+    .invite-detail-table td { padding: 9px 24px; font-size: 0.875rem; }
+    .invite-detail-table td:last-child { text-align: right; font-weight: 600; }
+    .invite-actions-footer { display: flex; justify-content: flex-end; gap: 10px; padding: 16px 24px; border-top: 1px solid var(--border); }
+    .btn-accept {
+      background: linear-gradient(135deg, #00bdd4, #83d43c); color: white; border: none;
+      border-radius: 8px; padding: 9px 24px;
+      font-family: inherit; font-size: 0.875rem; font-weight: 600;
+      cursor: pointer; transition: transform 0.2s, opacity 0.2s;
+    }
+    .btn-accept:hover { transform: translateY(-1px); opacity: 0.9; }
+    .btn-accept:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+    .btn-decline {
+      background: none; color: #e53e3e;
+      border: 1px solid #fed7d7; border-radius: 8px;
+      padding: 9px 20px; font-family: inherit; font-size: 0.875rem; font-weight: 600;
+      cursor: pointer; transition: background 0.2s;
+    }
+    .btn-decline:hover { background: #fff5f5; }
+    .btn-decline:disabled { opacity: 0.6; cursor: not-allowed; }
+
+    /* Not-linked state */
+    .not-linked { padding: 60px 24px; text-align: center; }
+    .not-linked h2 { font-size: 1.1rem; font-weight: 700; margin-bottom: 8px; }
+    .not-linked p { font-size: 0.875rem; color: var(--muted); max-width: 380px; margin: 0 auto; line-height: 1.6; }
+
+    /* ── SECTION BANNERS (Payslips / Profile pages) ── */
+    .section-banner {
+      background: linear-gradient(135deg, var(--charcoal) 0%, #3a3d38 100%);
+      border-radius: var(--radius); padding: 24px 28px;
+      display: flex; align-items: center; gap: 16px;
+      box-shadow: 0 4px 20px rgba(44,46,42,0.25);
+    }
+    .section-banner h2 { font-size: 1.2rem; font-weight: 700; color: white; letter-spacing: -0.02em; }
+    .section-banner p  { font-size: 0.82rem; color: rgba(255,255,255,0.5); margin-top: 3px; }
+    .section-banner-icon {
+      width: 44px; height: 44px; border-radius: 12px; flex-shrink: 0;
+      background: rgba(0,189,212,0.15); border: 1px solid rgba(0,189,212,0.3);
+      display: flex; align-items: center; justify-content: center; color: var(--cyan);
+    }
+    .section-banner-back {
+      margin-left: auto; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.15);
+      color: rgba(255,255,255,0.8); border-radius: 8px; padding: 7px 14px;
+      font-family: inherit; font-size: 0.8rem; font-weight: 500; cursor: pointer;
+      transition: background 0.2s;
+    }
+    .section-banner-back:hover { background: rgba(255,255,255,0.18); }
+    /* Payslips / Profile panels — same vertical rhythm as dashboard */
+    #panel-payslips, #panel-profile { display: flex; flex-direction: column; gap: 20px; }
+    /* Payslips stat row */
+    .ps-stats-row { display: grid; grid-template-columns: repeat(3,1fr); gap: 20px; }
+    /* Profile banner avatar */
+    .profile-banner-avatar {
+      width: 52px; height: 52px; border-radius: 50%; flex-shrink: 0;
+      background: rgba(0,189,212,0.2); border: 2px solid rgba(0,189,212,0.4);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.2rem; font-weight: 700; color: var(--cyan);
+    }
+    /* Profile info grid */
+    .profile-info-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 20px; }
+    @media (max-width: 768px) {
+      .ps-stats-row, .profile-info-grid { grid-template-columns: 1fr 1fr; }
+    }
+    @media (max-width: 480px) {
+      .ps-stats-row, .profile-info-grid { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 768px) {
+      .sidebar { width: 60px; }
+      .sidebar-brand-text, .sidebar-link-inner, .sidebar-section-label, .sidebar-user-info { display: none; }
+      .sidebar-brand { justify-content: center; padding: 16px 8px; }
+      .sidebar-link { justify-content: center; padding: 10px; }
+      .sidebar-user-row { justify-content: center; }
+      .page-wrapper { margin-left: 60px; }
+      main { padding: 16px; }
+      .info-row { grid-template-columns: 1fr 1fr; }
+      .profile-grid { grid-template-columns: 1fr; }
+      .welcome-banner { flex-direction: column; align-items: flex-start; }
+    }
+    @media (max-width: 480px) {
+      .info-row { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── SIDEBAR NAV ── -->
+<nav class="sidebar">
+  <a href="employee.html" class="sidebar-brand">
+    <img src="wagewise_assets/Wagewise_logo.png" alt="WageWise" />
+    <span class="sidebar-brand-text">WageWise</span>
+  </a>
+  <div class="sidebar-section-label">My Account</div>
+  <div class="sidebar-nav">
+    <a href="employee.html" class="sidebar-link active" data-link="dashboard">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+      <span class="sidebar-link-inner"><span class="sidebar-link-front">Dashboard</span><span class="sidebar-link-back">Dashboard</span></span>
+    </a>
+    <button class="sidebar-link" id="sidebarTabPayslips">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+      <span>My Payslips</span>
+    </button>
+    <button class="sidebar-link" id="sidebarTabProfile">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      <span>My Profile</span>
+    </button>
+  </div>
+  <div class="sidebar-footer">
+    <div class="sidebar-user-row">
+      <div class="nav-avatar" id="avatarBtn">
+        <span id="avatarInitials">—</span>
+        <div class="avatar-menu" id="avatarMenu">
+          <span class="avatar-menu-item" style="font-size:0.75rem;color:var(--muted);cursor:default;border-bottom:1px solid var(--border)" id="avatarEmail"></span>
+          <button class="avatar-menu-item" id="btnOpenSettings">Account Settings</button>
+          <button class="avatar-menu-item danger" id="btnLogout">Sign out</button>
+        </div>
+      </div>
+      <div class="sidebar-user-info">
+        <span class="sidebar-user-name" id="navUserName">Employee</span>
+        <span class="sidebar-user-role">Employee</span>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<div class="page-wrapper">
+<main id="mainContent" style="display:none">
+
+  <!-- Welcome -->
+  <div class="welcome-banner">
+    <div class="welcome-text">
+      <h1 id="welcomeName">Welcome back</h1>
+      <p id="welcomeSub">Here's your payroll overview</p>
+    </div>
+    <div class="welcome-badge" id="welcomeBadge">Employee</div>
+  </div>
+
+  <!-- Info cards -->
+  <div class="info-row">
+    <div class="info-card">
+      <div class="info-card-icon">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+      </div>
+      <div class="info-label">Basic Salary</div>
+      <div class="info-value" id="cardSalary">—</div>
+      <div class="info-sub">Monthly</div>
+    </div>
+    <div class="info-card">
+      <div class="info-card-icon">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+      </div>
+      <div class="info-label">Department</div>
+      <div class="info-value" id="cardDept">—</div>
+      <div class="info-sub" id="cardPosition">—</div>
+    </div>
+    <div class="info-card">
+      <div class="info-card-icon">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+      </div>
+      <div class="info-label">Latest Net Pay</div>
+      <div class="info-value" id="cardNetPay">—</div>
+      <div class="info-sub" id="cardPayPeriod">No payslip yet</div>
+    </div>
+  </div>
+
+  <!-- Quick Actions (visible on Dashboard) -->
+  <div class="quick-actions" id="quick-actions">
+    <a class="quick-action-card" href="#" onclick="event.preventDefault(); showSection('payslips')">
+      <div class="quick-action-left">
+        <div class="quick-action-icon qai-cyan">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        </div>
+        <div>
+          <div class="quick-action-label">My Payslips</div>
+          <div class="quick-action-sub">View and download your payslips</div>
+        </div>
+      </div>
+      <svg class="quick-action-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+    </a>
+    <a class="quick-action-card" href="#" onclick="event.preventDefault(); showSection('profile')">
+      <div class="quick-action-left">
+        <div class="quick-action-icon qai-purple">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        </div>
+        <div>
+          <div class="quick-action-label">My Profile</div>
+          <div class="quick-action-sub">View your employment details</div>
+        </div>
+      </div>
+      <svg class="quick-action-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+    </a>
+  </div>
+
+  <!-- Removed notice (shown only on dashboard for removed employees) -->
+  <div id="removedNotice" style="display:none">
+    <div class="panel">
+      <div class="not-linked" style="padding:28px 24px">
+        <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="#fbd38d" stroke-width="1.5" style="margin-bottom:14px"><circle cx="12" cy="8" r="4"/><path d="M6 20v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2"/></svg>
+        <h2 style="color:#92400e">Account not yet linked to an organization</h2>
+        <p>You are not currently part of an organization. Your payslip history is still accessible from the sidebar. Contact your administrator if you believe this is a mistake or are waiting for an invite.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- PAYSLIPS PANEL -->
+  <div id="panel-payslips" style="display:none">
+    <div class="section-banner">
+      <div class="section-banner-icon">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+      </div>
+      <div>
+        <h2>My Payslips</h2>
+        <p>Your complete payslip history</p>
+      </div>
+      <button class="section-banner-back" onclick="showSection('dashboard')">← Dashboard</button>
+    </div>
+    <div class="ps-stats-row">
+      <div class="info-card" style="border-top:3px solid var(--cyan)">
+        <div class="info-card-icon" style="background:rgba(0,189,212,0.1);color:var(--cyan)">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        </div>
+        <div class="info-label">Total Payslips</div>
+        <div class="info-value" id="psStatCount">—</div>
+        <div class="info-sub">All time</div>
+      </div>
+      <div class="info-card" style="border-top:3px solid #805ad5">
+        <div class="info-card-icon" style="background:rgba(128,90,213,0.1);color:#805ad5">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+        </div>
+        <div class="info-label">Latest Net Pay</div>
+        <div class="info-value" id="psStatNetPay">—</div>
+        <div class="info-sub">Most recent</div>
+      </div>
+      <div class="info-card" style="border-top:3px solid #38a169">
+        <div class="info-card-icon" style="background:rgba(56,161,105,0.1);color:#38a169">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        </div>
+        <div class="info-label">Last Pay Period</div>
+        <div class="info-value" id="psStatPeriod" style="font-size:0.95rem">—</div>
+        <div class="info-sub">Pay period</div>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="panel-header">
+        <h3 class="panel-title">Payslip History</h3>
+      </div>
+      <div class="panel-body">
+        <div class="payslip-list" id="payslipList">
+          <div class="empty-state">Loading your payslips…</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PROFILE PANEL -->
+  <div id="panel-profile" style="display:none">
+    <div class="section-banner">
+      <div class="profile-banner-avatar" id="profileBannerAvatar">—</div>
+      <div>
+        <h2 id="profileBannerName">—</h2>
+        <p id="profileBannerRole">—</p>
+      </div>
+      <button class="section-banner-back" onclick="showSection('dashboard')">← Dashboard</button>
+    </div>
+    <div class="profile-info-grid" id="profileGrid">
+      <!-- Populated by JS -->
+    </div>
+  </div>
+
+</main>
+
+<!-- Not linked state (shown if no employee record found) -->
+<main id="notLinkedContent" style="display:none">
+  <div class="panel">
+    <div class="not-linked">
+      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#cbd5e0" stroke-width="1.5" style="margin-bottom:16px"><circle cx="12" cy="8" r="4"/><path d="M6 20v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2"/></svg>
+      <h2>Account not yet linked</h2>
+      <p>Your login account hasn't been linked to an employee record yet. Please contact your HR administrator and ask them to add your email (<span id="notLinkedEmail" style="color:var(--text);font-weight:600"></span>) to the employee list.</p>
+    </div>
+  </div>
+</main>
+</div><!-- /.page-wrapper -->
+
+<!-- ── ACCOUNT SETTINGS MODAL ── -->
+<div class="modal-overlay" id="modalSettings">
+  <div class="settings-modal">
+    <div class="settings-header">
+      <img src="wagewise_assets/Wagewise_logo.png" alt="WageWise" />
+      <button class="settings-close" data-close="modalSettings">×</button>
+    </div>
+    <div class="settings-avatar-section">
+      <div class="settings-avatar-circle" id="settingsAvatarCircle">—</div>
+      <div style="font-size:1rem;font-weight:700" id="settingsDisplayName">—</div>
+      <div class="settings-user-email" id="settingsUserEmail">—</div>
+    </div>
+    <div class="settings-body">
+      <div class="settings-alert" id="settingsAlert"></div>
+      <div class="settings-field">
+        <label>Display Name</label>
+        <input type="text" id="settingsName" placeholder="Your name" />
+      </div>
+      <div class="settings-field">
+        <label>Email</label>
+        <input type="email" id="settingsEmail" readonly />
+      </div>
+      <hr class="settings-divider" />
+      <div class="settings-section-title">Change Password</div>
+      <div class="settings-field">
+        <label>Current Password</label>
+        <input type="password" id="settingsCurrentPwd" placeholder="Enter current password" autocomplete="current-password" />
+      </div>
+      <div class="settings-field">
+        <label>New Password</label>
+        <input type="password" id="settingsNewPwd" placeholder="At least 6 characters" autocomplete="new-password" />
+      </div>
+      <div class="settings-field">
+        <label>Confirm New Password</label>
+        <input type="password" id="settingsConfirmPwd" placeholder="Repeat new password" autocomplete="new-password" />
+      </div>
+      <button class="btn-settings-secondary" id="btnChangePassword" style="align-self:flex-start">Change Password</button>
+    </div>
+    <div class="settings-footer">
+      <button class="btn-settings-secondary" data-close="modalSettings">Cancel</button>
+      <button class="btn-settings-save" id="btnSaveSettings">Save Changes</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── INVITE MODAL ── -->
+<div class="modal-overlay" id="inviteModal">
+  <div class="payslip-modal">
+    <div class="modal-header-gradient">
+      <img src="wagewise_assets/Wagewise_logo.png" alt="WageWise" />
+      <button class="close-btn" data-close="inviteModal">×</button>
+    </div>
+    <div class="invite-role-row">
+      <div>
+        <div class="invite-role-name" id="inviteRoleName">—</div>
+        <div class="invite-role-sub" id="inviteRoleSub">—</div>
+      </div>
+      <span class="badge badge-pending">Pending Invite</span>
+    </div>
+    <div class="section-label">Offer Details</div>
+    <table class="invite-detail-table">
+      <tr><td>Position</td><td id="invitePosition">—</td></tr>
+      <tr><td>Department</td><td id="inviteDepartment">—</td></tr>
+      <tr><td>Basic Salary</td><td id="inviteSalary">—</td></tr>
+      <tr><td>Allowance</td><td id="inviteAllowance">—</td></tr>
+    </table>
+    <div class="net-pay-footer" style="padding:14px 24px">
+      <span style="font-size:0.875rem;opacity:0.85">Review and accept your employment offer</span>
+    </div>
+    <div class="invite-actions-footer">
+      <button class="btn-decline" id="btnDeclineInvite">Decline</button>
+      <button class="btn-accept" id="btnAcceptInvite">Accept Offer</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── PAYSLIP VIEW MODAL ── -->
+<div class="modal-overlay" id="modalView">
+  <div class="payslip-modal">
+    <div class="modal-header-gradient">
+      <img src="wagewise_assets/Wagewise_logo.png" alt="WageWise" />
+      <button class="close-btn" data-close="modalView">×</button>
+    </div>
+    <div class="payslip-name-row">
+      <span class="payslip-emp-name" id="viewEmpName">—</span>
+      <span class="payslip-date" id="viewDate">—</span>
+    </div>
+    <div class="section-label">Earnings</div>
+    <table class="slip-table earnings">
+      <tr><td>Salary</td><td id="viewSalary">—</td></tr>
+      <tr><td>Overtime</td><td id="viewOT">—</td></tr>
+      <tr><td>Allowance</td><td id="viewAllowance">—</td></tr>
+      <tr><td>Gross Pay</td><td id="viewGross">—</td></tr>
+    </table>
+    <div class="section-label">Deductions</div>
+    <table class="slip-table deductions">
+      <tr><td>SSS</td><td id="viewSSS">—</td></tr>
+      <tr><td>PhilHealth</td><td id="viewPhilHealth">—</td></tr>
+      <tr><td>Pag-IBIG</td><td id="viewPagIBIG">—</td></tr>
+      <tr><td>Tax</td><td id="viewTax">—</td></tr>
+      <tr><td>Total Deductions</td><td id="viewTotal">—</td></tr>
+    </table>
+    <div class="net-pay-footer">
+      <span>NET PAY</span>
+      <span class="amount" id="viewNetPay">—</span>
+    </div>
+    <div class="payslip-actions">
+      <span class="badge" id="viewStatus">—</span>
+      <button class="btn btn-outline btn-sm" data-close="modalView">Close</button>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+  import { initializeApp }    from 'https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js';
+  import { getAuth, onAuthStateChanged, signOut, updateProfile, updatePassword, reauthenticateWithCredential, EmailAuthProvider }
+    from 'https://www.gstatic.com/firebasejs/10.11.0/firebase-auth.js';
+  import { getFirestore, collection, doc, getDoc, getDocs, updateDoc, deleteDoc, query, where }
+    from 'https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js';
+  import { firebaseConfig } from './firebase-config.js';
+
+  const app  = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db   = getFirestore(app);
+
+  let employeeRecord    = null;
+  let myPayslips        = [];
+  let currentUser       = null;
+  let isRemovedEmployee = false;
+
+  // ── Auth guard ─────────────────────────────────────────────────────────────
+  onAuthStateChanged(auth, async user => {
+    if (!user) return (window.location.href = 'login.html');
+    const uSnap = await getDoc(doc(db, 'users', user.uid));
+    const uData = uSnap.exists() ? uSnap.data() : {};
+
+    // Admins shouldn't be here
+    if (uData.role === 'admin') return (window.location.href = 'dashboard.html');
+
+    currentUser = user;
+    initAvatar(user, uData.name);
+    document.getElementById('navUserName').textContent = uData.name || '';
+
+    // Find employee record by email (prefer active/invited over removed)
+    const empSnap = await getDocs(query(collection(db, 'employees'), where('email', '==', user.email)));
+    const validDocs   = empSnap.docs.filter(d => d.data().status !== 'removed');
+    const removedDocs = empSnap.docs.filter(d => d.data().status === 'removed');
+
+    if (empSnap.empty || (!validDocs.length && !removedDocs.length)) {
+      document.getElementById('notLinkedEmail').textContent = user.email;
+      document.getElementById('notLinkedContent').style.display = 'block';
+      return;
+    }
+
+    // Removed employee — show full dashboard with notice + payslip access
+    if (!validDocs.length && removedDocs.length > 0) {
+      employeeRecord = { id: removedDocs[0].id, ...removedDocs[0].data() };
+      isRemovedEmployee = true;
+      document.getElementById('mainContent').style.display = 'flex';
+      populateUI(uData.name || employeeRecord.name);
+      // Override subtitle/badge for removed state
+      document.getElementById('welcomeSub').textContent = 'Former Employee';
+      document.getElementById('welcomeBadge').textContent = 'Inactive';
+      await loadPayslips();
+      showSection('dashboard');
+      return;
+    }
+
+    employeeRecord = { id: validDocs[0].id, ...validDocs[0].data() };
+    document.getElementById('mainContent').style.display = 'flex';
+    populateUI(uData.name || employeeRecord.name);
+    await loadPayslips();
+    showSection('dashboard');
+
+    // Show invite modal if employee status is 'invited'
+    if (employeeRecord.status === 'invited') {
+      document.getElementById('inviteRoleName').textContent = employeeRecord.name || '—';
+      document.getElementById('inviteRoleSub').textContent  = employeeRecord.position + ' · ' + employeeRecord.department;
+      document.getElementById('invitePosition').textContent   = employeeRecord.position || '—';
+      document.getElementById('inviteDepartment').textContent = employeeRecord.department || '—';
+      document.getElementById('inviteSalary').textContent     = peso(employeeRecord.basicSalary);
+      document.getElementById('inviteAllowance').textContent  = peso(employeeRecord.allowance || 0);
+      openModal('inviteModal');
+    }
+  });
+
+  function initAvatar(user, name) {
+    const initials = (name || user.email).slice(0,2).toUpperCase();
+    document.getElementById('avatarInitials').textContent = initials;
+    document.getElementById('avatarEmail').textContent = user.email;
+    document.getElementById('navUserName').textContent = name || user.email;
+  }
+
+  document.getElementById('avatarBtn').addEventListener('click', e => {
+    e.stopPropagation();
+    document.getElementById('avatarMenu').classList.toggle('open');
+  });
+  document.addEventListener('click', () => document.getElementById('avatarMenu').classList.remove('open'));
+  document.getElementById('btnLogout').addEventListener('click', async () => { await signOut(auth); window.location.href = 'login.html'; });
+
+  // ── Account Settings ────────────────────────────────────────────────────────
+  document.getElementById('btnOpenSettings').addEventListener('click', () => {
+    document.getElementById('avatarMenu').classList.remove('open');
+    if (!currentUser) return;
+    const initials = document.getElementById('avatarInitials').textContent;
+    document.getElementById('settingsAvatarCircle').textContent = initials;
+    document.getElementById('settingsDisplayName').textContent = currentUser.displayName || currentUser.email;
+    document.getElementById('settingsUserEmail').textContent = currentUser.email;
+    document.getElementById('settingsName').value = currentUser.displayName || '';
+    document.getElementById('settingsEmail').value = currentUser.email || '';
+    document.getElementById('settingsAlert').className = 'settings-alert';
+    document.getElementById('settingsAlert').textContent = '';
+    ['settingsCurrentPwd','settingsNewPwd','settingsConfirmPwd'].forEach(id => document.getElementById(id).value = '');
+    openModal('modalSettings');
+  });
+
+  document.getElementById('btnSaveSettings').addEventListener('click', async () => {
+    const btn = document.getElementById('btnSaveSettings');
+    const newName = document.getElementById('settingsName').value.trim();
+    if (!newName) return showSettingsAlert('error', 'Name cannot be empty.');
+    btn.disabled = true; btn.textContent = 'Saving…';
+    try {
+      await updateProfile(currentUser, { displayName: newName });
+      await updateDoc(doc(db, 'users', currentUser.uid), { name: newName });
+      document.getElementById('navUserName').textContent = newName;
+      const initials = newName.slice(0,2).toUpperCase();
+      document.getElementById('avatarInitials').textContent = initials;
+      document.getElementById('settingsAvatarCircle').textContent = initials;
+      document.getElementById('settingsDisplayName').textContent = newName;
+      showSettingsAlert('success', 'Name updated successfully.');
+    } catch(e) { showSettingsAlert('error', 'Failed to save. Try again.'); }
+    btn.disabled = false; btn.textContent = 'Save Changes';
+  });
+
+  document.getElementById('btnChangePassword').addEventListener('click', async () => {
+    const btn        = document.getElementById('btnChangePassword');
+    const currentPwd = document.getElementById('settingsCurrentPwd').value;
+    const newPwd     = document.getElementById('settingsNewPwd').value;
+    const confirmPwd = document.getElementById('settingsConfirmPwd').value;
+    if (!currentPwd) return showSettingsAlert('error', 'Please enter your current password.');
+    if (!newPwd || newPwd.length < 6) return showSettingsAlert('error', 'New password must be at least 6 characters.');
+    if (newPwd !== confirmPwd) return showSettingsAlert('error', 'Passwords do not match.');
+    btn.disabled = true; btn.textContent = 'Updating…';
+    try {
+      const credential = EmailAuthProvider.credential(currentUser.email, currentPwd);
+      await reauthenticateWithCredential(currentUser, credential);
+      await updatePassword(currentUser, newPwd);
+      document.getElementById('settingsCurrentPwd').value = '';
+      document.getElementById('settingsNewPwd').value = '';
+      document.getElementById('settingsConfirmPwd').value = '';
+      showSettingsAlert('success', 'Password updated successfully.');
+    } catch(e) {
+      if (e.code === 'auth/wrong-password' || e.code === 'auth/invalid-credential') {
+        showSettingsAlert('error', 'Current password is incorrect.');
+      } else {
+        showSettingsAlert('error', 'Failed to update password. Try again.');
+      }
+    }
+    btn.disabled = false; btn.textContent = 'Change Password';
+  });
+
+  function showSettingsAlert(type, msg) {
+    const el = document.getElementById('settingsAlert');
+    el.textContent = msg;
+    el.className = 'settings-alert ' + type;
+  }
+
+  // ── Sidebar section switching ───────────────────────────────────────────────
+  window.showSection = function showSection(section) {
+    const welcomeEl  = document.querySelector('.welcome-banner');
+    const infoRowEl  = document.querySelector('.info-row');
+    const quickActEl = document.getElementById('quick-actions');
+    const payslipsEl = document.getElementById('panel-payslips');
+    const profileEl      = document.getElementById('panel-profile');
+    const removedNoticeEl = document.getElementById('removedNotice');
+    welcomeEl.style.display  = 'none';
+    infoRowEl.style.display  = 'none';
+    if (quickActEl) quickActEl.style.display = 'none';
+    payslipsEl.style.display = 'none';
+    profileEl.style.display  = 'none';
+    if (removedNoticeEl) removedNoticeEl.style.display = 'none';
+    if (section === 'dashboard') {
+      welcomeEl.style.display = 'flex';
+      infoRowEl.style.display = 'grid';
+      if (quickActEl) quickActEl.style.display = 'flex';
+      if (removedNoticeEl && isRemovedEmployee) removedNoticeEl.style.display = 'block';
+    } else if (section === 'payslips') {
+      payslipsEl.style.display = 'flex';
+    } else if (section === 'profile') {
+      profileEl.style.display = 'flex';
+    }
+    document.querySelectorAll('.sidebar-link').forEach(l => l.classList.remove('active'));
+    if (section === 'dashboard') document.querySelector('a[href="employee.html"]')?.classList.add('active');
+    if (section === 'payslips')  document.getElementById('sidebarTabPayslips')?.classList.add('active');
+    if (section === 'profile')   document.getElementById('sidebarTabProfile')?.classList.add('active');
+  }
+  document.querySelector('a[href="employee.html"]')?.addEventListener('click', e => { e.preventDefault(); showSection('dashboard'); });
+  document.getElementById('sidebarTabPayslips')?.addEventListener('click', () => showSection('payslips'));
+  document.getElementById('sidebarTabProfile')?.addEventListener('click', () => showSection('profile'));
+
+  // ── Populate UI ────────────────────────────────────────────────────────────
+  function populateUI(displayName) {
+    const emp  = employeeRecord;
+    const name = displayName || emp.name || '—';
+    document.getElementById('welcomeName').textContent  = 'Welcome back, ' + name;
+    document.getElementById('welcomeSub').textContent   = (emp.position && emp.department) ? emp.position + ' · ' + emp.department : (emp.position || emp.department || 'Employee');
+    document.getElementById('welcomeBadge').textContent = emp.status === 'active' ? 'Active Employee' : 'Inactive';
+    document.getElementById('cardSalary').textContent   = peso(emp.basicSalary);
+    document.getElementById('cardDept').textContent     = emp.department || '—';
+    document.getElementById('cardPosition').textContent = emp.position || '—';
+
+    // Profile banner
+    document.getElementById('profileBannerAvatar').textContent = name.slice(0,2).toUpperCase();
+    document.getElementById('profileBannerName').textContent   = name;
+    document.getElementById('profileBannerRole').textContent   = (emp.position && emp.department) ? emp.position + ' · ' + emp.department : (emp.position || emp.department || 'Employee');
+
+    // Profile fields rendered as bento info-cards
+    const fields = [
+      { label: 'Full Name',    value: emp.name || '—',            color: '#00bdd4', bg: 'rgba(0,189,212,0.1)',   icon: 'M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2M12 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8z' },
+      { label: 'Email',        value: emp.email || '—',            color: '#805ad5', bg: 'rgba(128,90,213,0.1)',  icon: 'M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z M22 6l-10 7L2 6' },
+      { label: 'Department',   value: emp.department || '—',       color: '#38a169', bg: 'rgba(56,161,105,0.1)',  icon: 'M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z' },
+      { label: 'Position',     value: emp.position || '—',         color: '#d97706', bg: 'rgba(217,119,6,0.1)',   icon: 'M20 7H4a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z M12 12m-2 0a2 2 0 1 0 4 0 2 2 0 1 0-4 0' },
+      { label: 'Basic Salary', value: peso(emp.basicSalary),       color: '#00bdd4', bg: 'rgba(0,189,212,0.1)',   icon: 'M12 1v22 M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6' },
+      { label: 'Allowance',    value: peso(emp.allowance || 0),    color: '#805ad5', bg: 'rgba(128,90,213,0.1)',  icon: 'M12 1v22 M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6' },
+      { label: 'Status',       value: emp.status || 'active',      color: '#38a169', bg: 'rgba(56,161,105,0.1)',  icon: 'M22 11.08V12a10 10 0 1 1-5.93-9.14 M22 4L12 14.01l-3-3' },
+    ];
+    document.getElementById('profileGrid').innerHTML = fields.map(f => `
+      <div class="info-card" style="border-top:3px solid ${f.color}">
+        <div class="info-card-icon" style="background:${f.bg};color:${f.color}">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="${f.icon}"/></svg>
+        </div>
+        <div class="info-label">${f.label}</div>
+        <div class="info-value" style="font-size:0.95rem">${esc(String(f.value))}</div>
+      </div>`).join('');
+  }
+
+  // ── Load payslips ──────────────────────────────────────────────────────────
+  async function loadPayslips() {
+    try {
+      const snap = await getDocs(query(
+        collection(db, 'payslips'),
+        where('employeeId', '==', employeeRecord.id)
+      ));
+      myPayslips = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      // Sort client-side (avoids needing a Firestore composite index)
+      myPayslips.sort((a, b) => {
+        const ta = a.generatedAt?.seconds || 0;
+        const tb = b.generatedAt?.seconds || 0;
+        return tb - ta;
+      });
+    } catch (e) {
+      console.error('Failed to load payslips:', e);
+      myPayslips = [];
+    }
+    renderPayslips();
+    updateLatest();
+    updatePayslipStats();
+  }
+
+  function updatePayslipStats() {
+    document.getElementById('psStatCount').textContent = myPayslips.length || '0';
+    if (myPayslips.length) {
+      document.getElementById('psStatNetPay').textContent = peso(myPayslips[0].netPay);
+      document.getElementById('psStatPeriod').textContent = myPayslips[0].payPeriod || '—';
+    }
+  }
+
+  function updateLatest() {
+    if (!myPayslips.length) return;
+    const latest = myPayslips[0];
+    document.getElementById('cardNetPay').textContent    = peso(latest.netPay);
+    document.getElementById('cardPayPeriod').textContent = latest.payPeriod;
+  }
+
+  function renderPayslips() {
+    const el = document.getElementById('payslipList');
+    if (!myPayslips.length) {
+      el.innerHTML = '<div class="empty-state">No payslips yet. Your payslips will appear here once your employer processes payroll.</div>';
+      return;
+    }
+    el.innerHTML = myPayslips.map(p => `
+      <div class="payslip-item">
+        <div style="flex:1">
+          <div class="ps-period">${esc(p.payPeriod)}</div>
+          <div class="ps-meta">Net Pay ${peso(p.netPay)} · Pay Date: ${p.payDate || '—'}</div>
+        </div>
+        <span class="badge badge-${p.status === 'approved' ? 'approved' : 'pending'}">${p.status === 'approved' ? 'Approved' : 'Pending'}</span>
+        <button class="btn btn-outline btn-sm" style="margin-left:10px" onclick="openView('${p.id}')">View</button>
+      </div>`).join('');
+  }
+
+  // ── View payslip ───────────────────────────────────────────────────────────
+  window.openView = (id) => {
+    const p = myPayslips.find(x => x.id === id);
+    if (!p) return;
+    document.getElementById('viewEmpName').textContent     = p.employeeName;
+    document.getElementById('viewDate').textContent        = p.payDate || p.payPeriod;
+    document.getElementById('viewSalary').textContent      = peso(p.basicSalary);
+    document.getElementById('viewOT').textContent          = peso(p.overtime || 0);
+    document.getElementById('viewAllowance').textContent   = peso(p.allowance || 0);
+    document.getElementById('viewGross').textContent       = peso(p.grossPay);
+    document.getElementById('viewSSS').textContent         = peso(p.sss);
+    document.getElementById('viewPhilHealth').textContent  = peso(p.philhealth);
+    document.getElementById('viewPagIBIG').textContent     = peso(p.pagibig);
+    document.getElementById('viewTax').textContent         = peso(p.tax);
+    document.getElementById('viewTotal').textContent       = peso(p.totalDeductions);
+    document.getElementById('viewNetPay').textContent      = peso(p.netPay);
+    const statusEl = document.getElementById('viewStatus');
+    statusEl.textContent = p.status === 'approved' ? 'Approved' : 'Pending';
+    statusEl.className   = `badge badge-${p.status === 'approved' ? 'approved' : 'pending'}`;
+    openModal('modalView');
+  };
+
+  // ── Invite accept / decline ────────────────────────────────────────────────
+  document.getElementById('btnAcceptInvite').addEventListener('click', async () => {
+    const btn = document.getElementById('btnAcceptInvite');
+    btn.disabled = true; btn.textContent = 'Accepting…';
+    try {
+      await updateDoc(doc(db, 'employees', employeeRecord.id), { status: 'active' });
+      employeeRecord.status = 'active';
+      closeModal('inviteModal');
+      document.getElementById('welcomeBadge').textContent = 'Active Employee';
+    } catch (e) { console.error(e); btn.disabled = false; btn.textContent = 'Accept Offer'; }
+  });
+
+  document.getElementById('btnDeclineInvite').addEventListener('click', async () => {
+    if (!confirm('Are you sure you want to decline? This will remove you from the employee list.')) return;
+    const btn = document.getElementById('btnDeclineInvite');
+    btn.disabled = true; btn.textContent = 'Declining…';
+    try {
+      await deleteDoc(doc(db, 'employees', employeeRecord.id));
+      employeeRecord = null;
+      closeModal('inviteModal');
+      document.getElementById('mainContent').style.display = 'none';
+      document.getElementById('notLinkedContent').style.display = 'block';
+    } catch (e) { console.error(e); btn.disabled = false; btn.textContent = 'Decline'; }
+  });
+
+  function openModal(id)  { document.getElementById(id).classList.add('open'); }
+  function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+  document.querySelectorAll('[data-close]').forEach(btn => btn.addEventListener('click', () => closeModal(btn.dataset.close)));
+  document.querySelectorAll('.modal-overlay').forEach(ov => ov.addEventListener('click', e => { if (e.target === ov) closeModal(ov.id); }));
+
+  function peso(n) { return '₱' + Number(n||0).toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
+  function esc(s)  { return String(s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+</script>
+</body>
+</html>

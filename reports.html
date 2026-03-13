@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>WageWise — Reports</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --cyan: #00bdd4; --cyan-dark: #009ab0; --cyan-light: rgba(0,189,212,0.1);
+      --charcoal: #2c2e2a;
+      --bg: #f0f2f5; --white: #fff; --border: #e2e8f0;
+      --text: #1a202c; --muted: #718096;
+      --success: #38a169; --success-bg: #f0fff4; --success-border: #c6f6d5;
+      --danger: #e53e3e; --danger-bg: #fff5f5; --danger-border: #fed7d7;
+      --shadow-sm: 0 1px 3px rgba(0,0,0,0.07), 0 1px 2px rgba(0,0,0,0.04);
+      --shadow-md: 0 4px 12px rgba(0,0,0,0.07), 0 2px 4px rgba(0,0,0,0.04);
+      --radius: 12px;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); -webkit-font-smoothing: antialiased; }
+
+    /* ── SIDEBAR NAV ── */
+    .sidebar {
+      position: fixed; left: 0; top: 0; bottom: 0; width: 224px;
+      background: var(--white); border-right: 1px solid var(--border);
+      box-shadow: var(--shadow-sm); z-index: 50;
+      display: flex; flex-direction: column;
+    }
+    .sidebar-brand {
+      display: flex; align-items: center; gap: 10px;
+      padding: 18px 16px;
+      text-decoration: none; flex-shrink: 0;
+      background: var(--cyan);
+    }
+    .sidebar-brand img { height: 28px; width: auto; filter: brightness(0) invert(1); }
+    .sidebar-brand-text { font-size: 0.9rem; font-weight: 700; color: white; letter-spacing: -0.01em; }
+    .sidebar-section-label {
+      padding: 16px 16px 4px;
+      font-size: 0.68rem; font-weight: 700; color: var(--muted);
+      text-transform: uppercase; letter-spacing: 0.08em;
+    }
+    .sidebar-nav {
+      flex: 1; padding: 6px 8px;
+      display: flex; flex-direction: column; gap: 2px; overflow-y: auto;
+    }
+    .sidebar-link {
+      position: relative;
+      display: flex; align-items: center; gap: 10px;
+      padding: 9px 12px; border-radius: 8px;
+      font-size: 0.875rem; font-weight: 500; color: var(--muted);
+      text-decoration: none; cursor: pointer;
+      border: none; background: none; font-family: inherit;
+      width: 100%; text-align: left;
+    }
+    .sidebar-link:hover { color: var(--text); background: var(--bg); }
+    .sidebar-link.active { color: var(--cyan); background: var(--cyan-light); }
+    .sidebar-link svg { flex-shrink: 0; }
+    .sidebar-footer { padding: 8px; border-top: 1px solid var(--border); flex-shrink: 0; }
+    .sidebar-user-row {
+      display: flex; align-items: center; gap: 10px;
+      padding: 8px 10px; margin-bottom: 4px;
+    }
+    .sidebar-user-info { display: flex; flex-direction: column; flex: 1; min-width: 0; }
+    .sidebar-user-name {
+      font-size: 0.8rem; font-weight: 600; color: var(--text);
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .sidebar-user-role { font-size: 0.72rem; color: var(--muted); }
+    .nav-avatar {
+      width: 34px; height: 34px; border-radius: 50%;
+      background: var(--cyan); color: white;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.8rem; font-weight: 700; cursor: pointer;
+      flex-shrink: 0; position: relative;
+    }
+    .avatar-menu {
+      position: absolute; bottom: calc(100% + 8px); left: 0;
+      background: var(--white); border: 1px solid var(--border);
+      border-radius: 10px; box-shadow: var(--shadow-md);
+      min-width: 180px; overflow: hidden;
+      display: none; z-index: 100;
+    }
+    .avatar-menu.open { display: block; }
+    .avatar-menu-item {
+      display: block; padding: 10px 16px;
+      font-size: 0.85rem; color: var(--text);
+      cursor: pointer; border: none; background: none;
+      width: 100%; text-align: left; font-family: inherit;
+    }
+    .avatar-menu-item:hover { background: var(--bg); }
+    .avatar-menu-item.danger { color: var(--danger); }
+
+    /* ── PAGE WRAPPER ── */
+    .page-wrapper { margin-left: 224px; }
+    main { padding: 32px; max-width: 1200px; margin: 0 auto; display: flex; flex-direction: column; gap: 24px; }
+
+    /* ── ADMIN WELCOME ── */
+    .admin-welcome {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 28px 32px; margin-bottom: 0;
+      background: linear-gradient(135deg, var(--charcoal) 0%, #3d3f3b 100%);
+      border-radius: var(--radius);
+      box-shadow: 0 4px 20px rgba(44,46,42,0.2);
+    }
+    .admin-welcome-text h1 { font-size: 1.4rem; font-weight: 700; color: white; letter-spacing: -0.02em; }
+    .admin-welcome-text p  { font-size: 0.875rem; color: rgba(255,255,255,0.5); margin-top: 4px; }
+    .admin-welcome-badge {
+      background: rgba(0,189,212,0.15); border: 1px solid rgba(0,189,212,0.35);
+      color: var(--cyan); border-radius: 8px; padding: 8px 16px;
+      font-size: 0.8rem; font-weight: 600; white-space: nowrap;
+    }
+
+    /* ── PANEL ── */
+    .panel { background: var(--white); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow-sm); }
+    .panel-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 20px 24px; border-bottom: 1px solid var(--border);
+      flex-wrap: wrap; gap: 12px;
+      background: linear-gradient(135deg, rgba(0,189,212,0.03) 0%, rgba(255,255,255,0) 60%);
+    }
+    .panel-title { font-size: 1rem; font-weight: 700; color: var(--text); }
+    .panel-subtitle { font-size: 0.825rem; color: var(--muted); margin-top: 2px; }
+    .panel-body { padding: 24px; }
+
+    .btn { display: inline-flex; align-items: center; gap: 6px; padding: 9px 16px; border-radius: 8px; font-family: inherit; font-size: 0.85rem; font-weight: 600; cursor: pointer; border: none; transition: transform 0.2s, opacity 0.2s; }
+    .btn:hover { transform: translateY(-1px); opacity: 0.92; }
+    .btn:active { transform: translateY(0); }
+    .btn-outline { background: none; border: 1px solid var(--border); color: var(--text); }
+
+    .badge { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 0.72rem; font-weight: 600; }
+    .badge-pending  { background: #fffbeb; color: #92400e; border: 1px solid #fde68a; }
+    .badge-approved { background: var(--success-bg); color: var(--success); border: 1px solid var(--success-border); }
+
+    .empty-state { padding: 40px 24px; text-align: center; color: var(--muted); font-size: 0.875rem; }
+
+    @media (max-width: 768px) {
+      .sidebar { width: 60px; }
+      .sidebar-brand-text, .sidebar-section-label, .sidebar-user-info { display: none; }
+      .sidebar-brand { justify-content: center; padding: 16px 8px; }
+      .sidebar-link { justify-content: center; padding: 10px; }
+      .sidebar-link span { display: none; }
+      .sidebar-user-row { justify-content: center; }
+      .page-wrapper { margin-left: 60px; }
+      main { padding: 16px; }
+      .admin-welcome { flex-direction: column; align-items: flex-start; gap: 12px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── SIDEBAR NAV ── -->
+<nav class="sidebar">
+  <a href="dashboard.html" class="sidebar-brand">
+    <img src="wagewise_assets/Wagewise_logo.png" alt="WageWise" />
+    <span class="sidebar-brand-text">WageWise</span>
+  </a>
+  <div class="sidebar-section-label">Admin Panel</div>
+  <div class="sidebar-nav">
+    <a href="dashboard.html" class="sidebar-link">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      <span>Employees</span>
+    </a>
+    <a href="payroll.html" class="sidebar-link">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+      <span>Payroll</span>
+    </a>
+    <a href="reports.html" class="sidebar-link active">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+      <span>Reports</span>
+    </a>
+  </div>
+  <div class="sidebar-footer">
+    <div class="sidebar-user-row">
+      <div class="nav-avatar" id="avatarBtn">
+        <span id="avatarInitials">—</span>
+        <div class="avatar-menu" id="avatarMenu">
+          <span class="avatar-menu-item" style="font-size:0.75rem;color:var(--muted);cursor:default;border-bottom:1px solid var(--border)" id="avatarEmail"></span>
+          <button class="avatar-menu-item danger" id="btnLogout">Sign out</button>
+        </div>
+      </div>
+      <div class="sidebar-user-info">
+        <span class="sidebar-user-name" id="sidebarUserName">Admin</span>
+        <span class="sidebar-user-role">Administrator</span>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<div class="page-wrapper">
+<main>
+
+  <!-- Page Header -->
+  <div class="admin-welcome">
+    <div class="admin-welcome-text">
+      <h1>Reports</h1>
+      <p>Summary of payroll disbursements and approvals</p>
+    </div>
+    <div class="admin-welcome-badge">Admin</div>
+  </div>
+
+  <!-- Reports Panel -->
+  <div class="panel">
+    <div class="panel-header">
+      <div>
+        <h2 class="panel-title">Payroll Reports</h2>
+        <p class="panel-subtitle">Grouped by pay period</p>
+      </div>
+      <button class="btn btn-outline" id="btnExportReport">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Export CSV
+      </button>
+    </div>
+    <div class="panel-body" style="padding-top:8px">
+      <div id="reportSummary"><div class="empty-state">Loading…</div></div>
+    </div>
+  </div>
+
+</main>
+</div>
+
+<script type="module">
+  import { initializeApp }    from 'https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js';
+  import { getAuth, onAuthStateChanged, signOut }
+    from 'https://www.gstatic.com/firebasejs/10.11.0/firebase-auth.js';
+  import { getFirestore, collection, doc, getDoc, getDocs, query, where }
+    from 'https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js';
+  import { firebaseConfig } from './firebase-config.js';
+
+  const app  = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db   = getFirestore(app);
+
+  let allPayslips = [];
+  let currentUser = null;
+
+  // ── Auth guard ─────────────────────────────────────────────────────────────
+  onAuthStateChanged(auth, async user => {
+    if (!user) return (window.location.href = 'login.html');
+    const snap = await getDoc(doc(db, 'users', user.uid));
+    if (!snap.exists() || snap.data().role !== 'admin') return (window.location.href = 'employee.html');
+    currentUser = user;
+    initAvatar(user, snap.data().name);
+    await loadData();
+  });
+
+  function initAvatar(user, name) {
+    const initials = (name || user.email).slice(0,2).toUpperCase();
+    document.getElementById('avatarInitials').textContent = initials;
+    document.getElementById('avatarEmail').textContent = user.email;
+    const nameEl = document.getElementById('sidebarUserName');
+    if (nameEl) nameEl.textContent = name || user.email;
+  }
+
+  document.getElementById('avatarBtn').addEventListener('click', e => {
+    e.stopPropagation();
+    document.getElementById('avatarMenu').classList.toggle('open');
+  });
+  document.addEventListener('click', () => document.getElementById('avatarMenu').classList.remove('open'));
+  document.getElementById('btnLogout').addEventListener('click', async () => { await signOut(auth); window.location.href = 'login.html'; });
+
+  // ── Load data ──────────────────────────────────────────────────────────────
+  async function loadData() {
+    const snap = await getDocs(query(collection(db, 'payslips'), where('adminId', '==', currentUser.uid)));
+    allPayslips = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    allPayslips.sort((a, b) => (b.generatedAt?.seconds || 0) - (a.generatedAt?.seconds || 0));
+    renderReports();
+  }
+
+  // ── Render reports ─────────────────────────────────────────────────────────
+  function renderReports() {
+    const el = document.getElementById('reportSummary');
+    if (!allPayslips.length) { el.innerHTML = '<div class="empty-state">No payslip data yet.</div>'; return; }
+    const byPeriod = {};
+    allPayslips.forEach(p => {
+      if (!byPeriod[p.payPeriod]) byPeriod[p.payPeriod] = { count: 0, total: 0, approved: 0 };
+      byPeriod[p.payPeriod].count++;
+      byPeriod[p.payPeriod].total += p.netPay || 0;
+      if (p.status === 'approved') byPeriod[p.payPeriod].approved++;
+    });
+    el.innerHTML = `<table style="width:100%;border-collapse:collapse">
+      <thead><tr style="border-bottom:1px solid var(--border)">
+        <th style="text-align:left;padding:8px 0;font-size:0.775rem;color:var(--muted);text-transform:uppercase;letter-spacing:.05em">Period</th>
+        <th style="text-align:right;padding:8px 0;font-size:0.775rem;color:var(--muted);text-transform:uppercase;letter-spacing:.05em">Employees</th>
+        <th style="text-align:right;padding:8px 0;font-size:0.775rem;color:var(--muted);text-transform:uppercase;letter-spacing:.05em">Total Net Pay</th>
+        <th style="text-align:right;padding:8px 0;font-size:0.775rem;color:var(--muted);text-transform:uppercase;letter-spacing:.05em">Approved</th>
+      </tr></thead>
+      <tbody>${Object.entries(byPeriod).map(([period, d]) => `
+        <tr style="border-bottom:1px solid var(--border)">
+          <td style="padding:12px 0;font-size:0.875rem;font-weight:600">${esc(period)}</td>
+          <td style="text-align:right;font-size:0.875rem;padding:12px 0">${d.count}</td>
+          <td style="text-align:right;font-size:0.875rem;font-weight:700;padding:12px 0">${peso(d.total)}</td>
+          <td style="text-align:right;padding:12px 0">
+            <span class="badge badge-${d.approved === d.count ? 'approved' : 'pending'}">${d.approved}/${d.count}</span>
+          </td>
+        </tr>`).join('')}
+      </tbody>
+    </table>`;
+  }
+
+  // ── CSV Export ─────────────────────────────────────────────────────────────
+  document.getElementById('btnExportReport').addEventListener('click', () => {
+    if (!allPayslips.length) return alert('No payslip data to export.');
+    const rows = [['Employee','Pay Period','Pay Date','Gross Pay','SSS','PhilHealth','Pag-IBIG','Tax','Total Deductions','Net Pay','Status']];
+    allPayslips.forEach(p => rows.push([p.employeeName, p.payPeriod, p.payDate, p.grossPay, p.sss, p.philhealth, p.pagibig, p.tax, p.totalDeductions, p.netPay, p.status]));
+    const csv  = rows.map(r => r.map(v => `"${v ?? ''}"`).join(',')).join('\n');
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const a    = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'payroll-report.csv'; a.click();
+  });
+
+  function peso(n) { return '₱' + Number(n||0).toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
+  function esc(s)  { return String(s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+</script>
+</body>
+</html>

@@ -52,3 +52,6 @@
 - Do not stop after one screenshot pass
 - Do not use `transition-all`
 - Do not use default Tailwind blue/indigo as primary color
+
+## Repository Rules
+- Ultimately, whats going to happen is we're syncing all the changes to GitHub, Github's going to automatically push it to Vercel and we'll be good to go. But when I am making changes with you here, we're always going to test on LocalHost until I tell you explicitly to push that to GitHub and commit those changes to GitHub.
