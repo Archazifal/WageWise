@@ -139,15 +139,6 @@
     .btn-primary:active { transform: translateY(0); }
     .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
 
-    .forgot-link {
-      display: block;
-      text-align: center;
-      margin-top: 14px;
-      font-size: 0.825rem;
-      color: var(--muted);
-      text-decoration: none;
-    }
-    .forgot-link:hover { color: var(--cyan); }
 
     /* Error / success */
     .alert {
@@ -227,7 +218,6 @@
           <input type="password" id="signin-password" placeholder="••••••••" autocomplete="current-password" />
         </div>
         <button class="btn-primary" id="btn-signin">Sign In</button>
-        <a href="#" class="forgot-link" id="link-forgot">Forgot password?</a>
       </div>
 
       <!-- SIGN UP -->
@@ -259,7 +249,7 @@
 
 <script type="module">
   import { initializeApp }           from 'https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js';
-  import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, sendPasswordResetEmail, onAuthStateChanged }
+  import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged }
     from 'https://www.gstatic.com/firebasejs/10.11.0/firebase-auth.js';
   import { getFirestore, doc, setDoc, getDoc, serverTimestamp }
     from 'https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js';
@@ -367,18 +357,6 @@
     }
   });
 
-  // ── Forgot Password ────────────────────────────────────────────────────────
-  document.getElementById('link-forgot').addEventListener('click', async e => {
-    e.preventDefault();
-    const email = document.getElementById('signin-email').value.trim();
-    if (!email) return showAlert('signin-alert', 'Enter your email above, then click Forgot password.');
-    try {
-      await sendPasswordResetEmail(auth, email);
-      showAlert('signin-alert', 'Password reset email sent. Check your inbox.', 'success');
-    } catch (err) {
-      showAlert('signin-alert', friendlyError(err.code));
-    }
-  });
 
   // Enter key support
   ['signin-email','signin-password'].forEach(id => {

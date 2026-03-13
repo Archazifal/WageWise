@@ -134,6 +134,35 @@
 
     .empty-state { padding: 40px 24px; text-align: center; color: var(--muted); font-size: 0.875rem; }
 
+    /* ── ACCOUNT SETTINGS MODAL ── */
+    .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.4); backdrop-filter: blur(4px); z-index: 200; align-items: center; justify-content: center; padding: 20px; }
+    .modal-overlay.open { display: flex; }
+    .settings-modal { background: var(--white); border-radius: 16px; width: 100%; max-width: 480px; box-shadow: 0 24px 60px rgba(0,0,0,0.2); overflow: hidden; animation: modalIn 0.2s ease; }
+    @keyframes modalIn { from { transform: translateY(12px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+    .settings-header { background: linear-gradient(135deg, #00bdd4, #83d43c); padding: 20px 24px; display: flex; align-items: center; justify-content: space-between; }
+    .settings-header img { height: 26px; filter: brightness(0) invert(1); }
+    .settings-close { background: rgba(255,255,255,0.25); border: none; cursor: pointer; width: 28px; height: 28px; border-radius: 50%; color: white; font-size: 1rem; display: flex; align-items: center; justify-content: center; }
+    .settings-avatar-section { display: flex; flex-direction: column; align-items: center; padding: 24px 24px 16px; border-bottom: 1px solid var(--border); }
+    .settings-avatar-circle { width: 72px; height: 72px; border-radius: 50%; background: var(--cyan); color: white; font-size: 1.5rem; font-weight: 700; display: flex; align-items: center; justify-content: center; margin-bottom: 12px; border: 3px solid rgba(0,189,212,0.3); }
+    .settings-user-email { font-size: 0.8rem; color: var(--muted); margin-top: 2px; }
+    .settings-body { padding: 20px 24px; display: flex; flex-direction: column; gap: 16px; }
+    .settings-field label { display: block; font-size: 0.775rem; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px; }
+    .settings-field input { width: 100%; padding: 10px 14px; border: 1px solid var(--border); border-radius: 8px; font-family: inherit; font-size: 0.9rem; color: var(--text); background: var(--white); outline: none; transition: border-color 0.2s, box-shadow 0.2s; }
+    .settings-field input:focus { border-color: var(--cyan); box-shadow: 0 0 0 3px rgba(0,189,212,0.12); }
+    .settings-field input[readonly] { background: var(--bg); color: var(--muted); cursor: not-allowed; }
+    .settings-divider { border: none; border-top: 1px solid var(--border); margin: 4px 0; }
+    .settings-section-title { font-size: 0.8rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; }
+    .settings-alert { padding: 10px 14px; border-radius: 8px; font-size: 0.85rem; font-weight: 500; display: none; }
+    .settings-alert.error   { background: #fff5f5; border: 1px solid #fed7d7; color: #e53e3e; display: block; }
+    .settings-alert.success { background: #f0fff4; border: 1px solid #c6f6d5; color: #276749; display: block; }
+    .settings-footer { display: flex; justify-content: flex-end; gap: 10px; padding: 16px 24px; border-top: 1px solid var(--border); }
+    .btn-settings-save { background: var(--cyan); color: white; border: none; border-radius: 8px; padding: 9px 20px; font-family: inherit; font-size: 0.875rem; font-weight: 600; cursor: pointer; transition: transform 0.2s, background 0.2s; }
+    .btn-settings-save:hover { background: var(--cyan-dark); transform: translateY(-1px); }
+    .btn-settings-save:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+    .btn-settings-secondary { background: none; border: 1px solid var(--border); color: var(--text); border-radius: 8px; padding: 9px 20px; font-family: inherit; font-size: 0.875rem; font-weight: 600; cursor: pointer; transition: background 0.2s; }
+    .btn-settings-secondary:hover { background: var(--bg); }
+    .btn-settings-secondary:disabled { opacity: 0.6; cursor: not-allowed; }
+
     @media (max-width: 768px) {
       .sidebar { width: 60px; }
       .sidebar-brand-text, .sidebar-section-label, .sidebar-user-info { display: none; }
@@ -176,6 +205,7 @@
         <span id="avatarInitials">—</span>
         <div class="avatar-menu" id="avatarMenu">
           <span class="avatar-menu-item" style="font-size:0.75rem;color:var(--muted);cursor:default;border-bottom:1px solid var(--border)" id="avatarEmail"></span>
+          <button class="avatar-menu-item" id="btnOpenSettings">Account Settings</button>
           <button class="avatar-menu-item danger" id="btnLogout">Sign out</button>
         </div>
       </div>
@@ -219,11 +249,56 @@
 </main>
 </div>
 
+<!-- ── ACCOUNT SETTINGS MODAL ── -->
+<div class="modal-overlay" id="modalSettings">
+  <div class="settings-modal">
+    <div class="settings-header">
+      <img src="wagewise_assets/Wagewise_logo.png" alt="WageWise" />
+      <button class="settings-close" data-close="modalSettings">×</button>
+    </div>
+    <div class="settings-avatar-section">
+      <div class="settings-avatar-circle" id="settingsAvatarCircle">—</div>
+      <div style="font-size:1rem;font-weight:700" id="settingsDisplayName">—</div>
+      <div class="settings-user-email" id="settingsUserEmail">—</div>
+    </div>
+    <div class="settings-body">
+      <div class="settings-alert" id="settingsAlert"></div>
+      <div class="settings-field">
+        <label>Display Name</label>
+        <input type="text" id="settingsName" placeholder="Your name" />
+      </div>
+      <div class="settings-field">
+        <label>Email</label>
+        <input type="email" id="settingsEmail" readonly />
+      </div>
+      <hr class="settings-divider" />
+      <div class="settings-section-title">Change Password</div>
+      <div class="settings-field">
+        <label>Current Password</label>
+        <input type="password" id="settingsCurrentPwd" placeholder="Enter current password" autocomplete="current-password" />
+      </div>
+      <div class="settings-field">
+        <label>New Password</label>
+        <input type="password" id="settingsNewPwd" placeholder="At least 6 characters" autocomplete="new-password" />
+      </div>
+      <div class="settings-field">
+        <label>Confirm New Password</label>
+        <input type="password" id="settingsConfirmPwd" placeholder="Repeat new password" autocomplete="new-password" />
+      </div>
+      <button class="btn-settings-secondary" id="btnChangePassword" style="align-self:flex-start">Change Password</button>
+    </div>
+    <div class="settings-footer">
+      <button class="btn-settings-secondary" data-close="modalSettings">Cancel</button>
+      <button class="btn-settings-save" id="btnSaveSettings">Save Changes</button>
+    </div>
+  </div>
+</div>
+
 <script type="module">
   import { initializeApp }    from 'https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js';
-  import { getAuth, onAuthStateChanged, signOut }
+  import { getAuth, onAuthStateChanged, signOut, updateProfile, updatePassword, reauthenticateWithCredential, EmailAuthProvider }
     from 'https://www.gstatic.com/firebasejs/10.11.0/firebase-auth.js';
-  import { getFirestore, collection, doc, getDoc, getDocs, query, where }
+  import { getFirestore, collection, doc, getDoc, getDocs, updateDoc, query, where }
     from 'https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js';
   import { firebaseConfig } from './firebase-config.js';
 
@@ -258,6 +333,77 @@
   });
   document.addEventListener('click', () => document.getElementById('avatarMenu').classList.remove('open'));
   document.getElementById('btnLogout').addEventListener('click', async () => { await signOut(auth); window.location.href = 'login.html'; });
+
+  // ── Account Settings ────────────────────────────────────────────────────────
+  document.getElementById('btnOpenSettings').addEventListener('click', () => {
+    document.getElementById('avatarMenu').classList.remove('open');
+    if (!currentUser) return;
+    const name = document.getElementById('avatarInitials').textContent;
+    document.getElementById('settingsAvatarCircle').textContent = name;
+    document.getElementById('settingsDisplayName').textContent = currentUser.displayName || currentUser.email;
+    document.getElementById('settingsUserEmail').textContent = currentUser.email;
+    document.getElementById('settingsName').value = currentUser.displayName || '';
+    document.getElementById('settingsEmail').value = currentUser.email || '';
+    document.getElementById('settingsAlert').className = 'settings-alert';
+    ['settingsCurrentPwd','settingsNewPwd','settingsConfirmPwd'].forEach(id => document.getElementById(id).value = '');
+    openModal('modalSettings');
+  });
+
+  document.getElementById('btnSaveSettings').addEventListener('click', async () => {
+    const btn = document.getElementById('btnSaveSettings');
+    const newName = document.getElementById('settingsName').value.trim();
+    if (!newName) return showSettingsAlert('error', 'Name cannot be empty.');
+    btn.disabled = true; btn.textContent = 'Saving…';
+    try {
+      await updateProfile(currentUser, { displayName: newName });
+      await updateDoc(doc(db, 'users', currentUser.uid), { name: newName });
+      document.getElementById('sidebarUserName') && (document.getElementById('sidebarUserName').textContent = newName);
+      const initials = newName.slice(0,2).toUpperCase();
+      document.getElementById('avatarInitials').textContent = initials;
+      document.getElementById('settingsAvatarCircle').textContent = initials;
+      document.getElementById('settingsDisplayName').textContent = newName;
+      showSettingsAlert('success', 'Name updated successfully.');
+    } catch(e) { showSettingsAlert('error', 'Failed to save. Try again.'); }
+    btn.disabled = false; btn.textContent = 'Save Changes';
+  });
+
+  document.getElementById('btnChangePassword').addEventListener('click', async () => {
+    const btn        = document.getElementById('btnChangePassword');
+    const currentPwd = document.getElementById('settingsCurrentPwd').value;
+    const newPwd     = document.getElementById('settingsNewPwd').value;
+    const confirmPwd = document.getElementById('settingsConfirmPwd').value;
+    if (!currentPwd) return showSettingsAlert('error', 'Please enter your current password.');
+    if (!newPwd || newPwd.length < 6) return showSettingsAlert('error', 'New password must be at least 6 characters.');
+    if (newPwd !== confirmPwd) return showSettingsAlert('error', 'Passwords do not match.');
+    btn.disabled = true; btn.textContent = 'Updating…';
+    try {
+      const credential = EmailAuthProvider.credential(currentUser.email, currentPwd);
+      await reauthenticateWithCredential(currentUser, credential);
+      await updatePassword(currentUser, newPwd);
+      document.getElementById('settingsCurrentPwd').value = '';
+      document.getElementById('settingsNewPwd').value = '';
+      document.getElementById('settingsConfirmPwd').value = '';
+      showSettingsAlert('success', 'Password updated successfully.');
+    } catch(e) {
+      if (e.code === 'auth/wrong-password' || e.code === 'auth/invalid-credential') {
+        showSettingsAlert('error', 'Current password is incorrect.');
+      } else {
+        showSettingsAlert('error', 'Failed to update password. Try again.');
+      }
+    }
+    btn.disabled = false; btn.textContent = 'Change Password';
+  });
+
+  function showSettingsAlert(type, msg) {
+    const el = document.getElementById('settingsAlert');
+    el.textContent = msg;
+    el.className = 'settings-alert ' + type;
+  }
+
+  function openModal(id)  { document.getElementById(id).classList.add('open'); }
+  function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+  document.querySelectorAll('[data-close]').forEach(btn => btn.addEventListener('click', () => closeModal(btn.dataset.close)));
+  document.querySelectorAll('.modal-overlay').forEach(ov => ov.addEventListener('click', e => { if (e.target === ov) closeModal(ov.id); }));
 
   // ── Load data ──────────────────────────────────────────────────────────────
   async function loadData() {
